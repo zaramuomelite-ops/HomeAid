@@ -23,6 +23,8 @@ export default function ChoiceScreen(){
                 <PrimaryButton style={styles.register}>
                     Register as an Artisan/Worker</PrimaryButton>
             </View>
+
+            <Text style={styles.text2}>Safe    •    Fast   •   Affordable</Text>
         </View>
     )
 }
@@ -64,9 +66,9 @@ const styles = StyleSheet.create({
       buttonContainer: {
         marginTop: 100,
         alignItems: "center",
-        marginLeft: 30,
-        marginRight: 30,
-        
+       
+       
+       
       },
       
       logIn:{
@@ -74,11 +76,13 @@ const styles = StyleSheet.create({
         paddingTop: 20,
         paddingBottom: 20,
         borderRadius: 15,
+       
       },
 
       signUp: {
         marginBottom: 20,
-        paddingTop: 20,
+        paddingTop: 20, marginLeft: 30,
+        marginRight: 30,
         paddingBottom: 20,
         backgroundColor: "#ebcce823",
         borderColor:  "#8b15b9",
@@ -97,7 +101,12 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderRadius: 15,
       },
-
+      
+  text2: {
+    marginTop: 30,
+    marginLeft: 100,
+    marginRight: 40,
+  }
 
     
 })

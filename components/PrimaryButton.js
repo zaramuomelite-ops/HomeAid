@@ -8,9 +8,12 @@ function PrimaryButton({children, onPress, style}){
         <View style={styles.container}>
    <Pressable 
    onPress={onPress}
-   style={[
-    styles.button, style]}
-   android_ripple={{color: "#230f79", borderless: false}}
+   android_ripple={{color: "#230f79", foreground: true}}
+   style={ ({ pressed }) => [
+    styles.button, 
+    style,
+    pressed && styles.pressed,
+   ]}
     >
     <Text style={styles.buttonText}>{children}</Text>
 
@@ -28,6 +31,7 @@ const styles = StyleSheet.create({
         width: 320,         
         alignItems: "center",
         borderRadius: 15,
+        overflow: "hidden"
       },
     
       buttonText: {
@@ -36,9 +40,8 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
       },
     
-      container: {
-        borderRadius: 15,
-        overflow: "hidden",
-        
+
+      pressed: {
+        opacity: 0.85,
       },
 });
