@@ -1,13 +1,24 @@
 import {Text, View, StyleSheet,Image} from "react-native";
 import PrimaryButton from "../components/PrimaryButton"
+import { Ionicons } from "@expo/vector-icons"
+import { Pressable } from "react-native"
 
-export default function ChoiceScreen(){
+export default function ChoiceScreen({navigation}){
     return (
         <View style={styles.container}>
         
         <View style={styles.topSection}>
+      <Pressable 
+            style ={styles.back}
+            onPress={() => navigation.goBack()}>
+          <Ionicons
+               name = "arrow-back"
+               size = {30}
+               color = "#8b15b9"/>
+      </Pressable>
             <Image style={styles.logo}
                    source={require("../assets/Images/logo.png")} /> 
+
             <Text style={styles.title}>Get the help you </Text>
                <Text style={styles.title2}> need, when you need it </Text>
             <Text style={styles.text}>
@@ -15,12 +26,21 @@ export default function ChoiceScreen(){
             </Text>
             
             </View>
+
             <View style={styles.buttonContainer}>
-                <PrimaryButton style={styles.logIn}>
+                <PrimaryButton 
+                style={styles.logIn}
+                onPress={() => navigation.navigate("LogIn")}>
                     Log In</PrimaryButton>
-                <PrimaryButton style={styles.signUp}>
+
+                <PrimaryButton 
+                style={styles.signUp}
+                icon= "person-add">
                     Sign Up as a Customer</PrimaryButton>
-                <PrimaryButton style={styles.register}>
+
+                <PrimaryButton 
+                style={styles.register}
+                icon = "construct">
                     Register as an Artisan/Worker</PrimaryButton>
             </View>
 
@@ -66,11 +86,13 @@ const styles = StyleSheet.create({
       buttonContainer: {
         marginTop: 100,
         alignItems: "center",
-       
-       
-       
       },
       
+      back: {
+        marginRight: 300,
+      
+      },
+
       logIn:{
         marginBottom: 20,
         paddingTop: 20,

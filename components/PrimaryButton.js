@@ -1,9 +1,14 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Text,
          StyleSheet, 
          Pressable,
          View,} from "react-native";
 
-function PrimaryButton({children, onPress, style}){
+function PrimaryButton({children, 
+                        onPress, 
+                        style,
+                        icon,
+                        iconPosition = "left",}){
     return(
         <View style={styles.container}>
    <Pressable 
@@ -15,7 +20,31 @@ function PrimaryButton({children, onPress, style}){
     pressed && styles.pressed,
    ]}
     >
-    <Text style={styles.buttonText}>{children}</Text>
+
+      <View style={styles.content}>
+
+        {icon && iconPosition === "left" && (
+            <Ionicons
+            name = {icon}
+            size = {22}
+            style = {styles.leftIcon}
+            color = "#8b15b9"
+            />
+        )}
+
+      <Text style={styles.buttonText}>{children}</Text>
+
+      {icon && iconPosition === "right" && (
+            <Ionicons
+            name = {icon}
+            size = {22}
+            style = {styles.rightIcon}
+            color = "#8b15b9"
+            />
+        )}
+
+      </View>
+   
 
    </Pressable>  
    </View>
@@ -43,5 +72,19 @@ const styles = StyleSheet.create({
 
       pressed: {
         opacity: 0.85,
+      },
+
+      content : {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+      },
+
+      leftIcon: {
+        marginRight: 25,
+      },
+
+      rightIcon: {
+        marginLeft: 25,
       },
 });
