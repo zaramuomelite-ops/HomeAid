@@ -2,17 +2,22 @@ import { Ionicons } from "@expo/vector-icons";
 import { Text,
          StyleSheet, 
          Pressable,
-         View,} from "react-native";
+         View,
+        ActivityIndicator,} from "react-native";
 
 function PrimaryButton({children, 
                         onPress, 
                         style,
+                        textColor = "white",
                         icon,
-                        iconPosition = "left",}){
+                        iconPosition = "left",
+                        loading = false,
+                        disabled = false,}){
     return(
         <View style={styles.container}>
    <Pressable 
    onPress={onPress}
+   disabled = {disabled}
    android_ripple={{color: "#230f79", foreground: true}}
    style={ ({ pressed }) => [
     styles.button, 
@@ -32,7 +37,26 @@ function PrimaryButton({children,
             />
         )}
 
-      <Text style={styles.buttonText}>{children}</Text>
+        {loading ? (
+          <>
+           < ActivityIndicator
+           color = "#fff"
+           size="small"
+           style = {{marginRight: 10}}
+         />
+
+      <Text style={[styles.buttonText, {color: textColor}]}>
+        Creating Account...
+      </Text>
+      </>
+        ) : (
+          <Text style={[styles.buttonText, {color: textColor}]}>
+          {children}
+        </Text>
+        ) }
+    
+
+      
 
       {icon && iconPosition === "right" && (
             <Ionicons
@@ -65,7 +89,7 @@ const styles = StyleSheet.create({
     
       buttonText: {
         color: "white",
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: "bold",
       },
     
@@ -75,16 +99,20 @@ const styles = StyleSheet.create({
       },
 
       content : {
+        width: "100%",
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
       },
 
       leftIcon: {
-        marginRight: 25,
+          position: "absolute",
+          left: 20,
+        
       },
 
       rightIcon: {
-        marginLeft: 25,
+        position: "absolute",
+        right: 20,
       },
 });

@@ -1,11 +1,13 @@
-import {Text, View, StyleSheet,Image} from "react-native";
+import {Text, View, StyleSheet,Image, ScrollView} from "react-native";
 import PrimaryButton from "../components/PrimaryButton"
 import { Ionicons } from "@expo/vector-icons"
 import { Pressable } from "react-native"
 
 export default function ChoiceScreen({navigation}){
     return (
-        <View style={styles.container}>
+       <ScrollView
+       contentContainerStyle={styles.container}
+       showsVerticalScrollIndicator={false}>
         
         <View style={styles.topSection}>
       <Pressable 
@@ -35,17 +37,21 @@ export default function ChoiceScreen({navigation}){
 
                 <PrimaryButton 
                 style={styles.signUp}
+                textColor = "#222"
+                onPress={() => navigation.navigate("CustomerSignup")}
                 icon= "person-add">
                     Sign Up as a Customer</PrimaryButton>
 
                 <PrimaryButton 
                 style={styles.register}
+                textColor = "#222"
+                onPress={() => navigation.navigate("ArtisanRegister")}
                 icon = "construct">
                     Register as an Artisan/Worker</PrimaryButton>
             </View>
 
             <Text style={styles.text2}>Safe    •    Fast   •   Affordable</Text>
-        </View>
+            </ScrollView>
     )
 }
 
@@ -111,6 +117,7 @@ const styles = StyleSheet.create({
         borderStyle: "solid",
         borderWidth: 2,
         borderRadius: 15,
+     
       },
 
       register: {
@@ -122,13 +129,15 @@ const styles = StyleSheet.create({
         borderStyle: "solid",
         borderWidth: 2,
         borderRadius: 15,
+    
       },
       
   text2: {
-    marginTop: 30,
+    marginTop: 10,
     marginLeft: 100,
     marginRight: 40,
-  }
+    fontWeight: "bold",
+  },
 
     
 })
