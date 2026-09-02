@@ -10,11 +10,12 @@ import LoginScreen from './Screens/LoginScreen';
 import CustomerRegistrationScreen from './Screens/CustomerSignupScreen';
 import ArtisanRegistrationScreen from './Screens/ArtisanRegistrationScreen';
 import CustomerSignupScreen from './Screens/CustomerSignupScreen';
-import OTPVerificationScreenH from './Screens/OTPVerificationScreenH';
+import OTPVerificationScreen from './Screens/OTPVerificationScreen';
 import CustomerHomeScreen from './Screens/CustomerHomeScreen';
 import BottomNavigation from './components/BottomNavigation';
 import AllServicesScreen from './Screens/AllServicesScreen';
 import PaymentScreen from './Screens/PaymentScreen';
+import EditProfileScreen from './Screens/EditProfileScreen'
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const Stack = createNativeStackNavigator();
@@ -51,8 +52,8 @@ export default function App() {
      />
 
    <Stack.Screen
-     name = "OTPVerification"
-     component = {OTPVerificationScreenH}
+     name = "OTPVerificationH"
+     component = {OTPVerificationScreen}
      />
 
    <Stack.Screen
@@ -66,6 +67,10 @@ export default function App() {
      <Stack.Screen
      name= "Payment"
      component={PaymentScreen}/>
+
+     <Stack.Screen
+     name = "EditProfile"
+     component={EditProfileScreen}/>
 
 
   </Stack.Navigator>

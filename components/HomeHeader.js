@@ -1,5 +1,8 @@
 import {Text, View, Image, StyleSheet, Pressable,} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useState, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function HomeHeader({
        greeting,
@@ -8,25 +11,56 @@ export default function HomeHeader({
        toggleTheme,
        darkMode,
        onNotificationPress,
+       navigation,
 }){
+
+  const [profileImage, setProfileImage] = useState(null);
+
+  const loadProfileImage = async () => {
+    try {
+      const savedData = await AsyncStorage.getItem("customerData");
+  
+      if (savedData) {
+        const customerData = JSON.parse(savedData);
+  
+        setProfileImage(customerData.profileImage || null);
+      }
+    } catch (error) {
+      console.log("Error loading profile image:", error);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      loadProfileImage();
+    }, [])
+  );
+
+  const handleProfilePress = () => {
+    navigation.navigate("EditProfile")
+  };
+
     return (
         <View style = {styles.container}>
-          
-                  <Pressable 
-                      style={styles.toggle}
-                      onPress={toggleTheme}>
-
-                    <Ionicons
-                       name={darkMode ? "sunny" : "moon"}
-                       size={25}
-                       color="#8b15b9"/>
-                  </Pressable>
 
             <View style = {styles.topRow}>
-              
-                   <Image
-                      source={require("../assets/Images/logo.png")}
-                      style = {styles.logo}/>
+
+             <Pressable onPress={handleProfilePress}>
+
+            {profileImage ? (
+              <Image
+                source={{ uri: profileImage }}
+                style={styles.profileImage}
+
+              />
+            ) : (
+              <Ionicons
+                name="person-circle"
+                size={48}
+                color="#8b15b9"
+              />
+            )}
+            </Pressable> 
                     
                  <View style = {styles.greetMe}>
                     <Text style = {styles.greeting}>
@@ -75,7 +109,7 @@ export default function HomeHeader({
 const styles = StyleSheet.create({
 
     container: {
-      marginTop: 85,
+      marginTop: 60,
       paddingHorizontal: 20,
     },
   
@@ -85,15 +119,12 @@ const styles = StyleSheet.create({
       alignItems: "flex-start",
     },
   
-    logo: {
-      width: 50,
-      height: 50,
-      backgroundColor: "#cccccc96",
-      borderRadius: 20,
-      borderWidth: 1,
-      marginRight: 28,
+    profileImage: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      borderWidth: 2,
       borderColor: "#8b15b9",
-      resizeMode: "contain",
     },
   
     rightIcons: {
@@ -113,29 +144,6 @@ const styles = StyleSheet.create({
       borderColor: "#8b15b9",
   
       elevation: 3,
-  
-      shadowColor: "#000",
-      shadowOpacity: 0.1,
-      shadowRadius: 5,
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
-    },
-
-    toggle: {
-      marginTop: -30,
-      marginBottom: 10,
-      width: 30,
-      height: 30,
-      borderRadius: 15,
-      backgroundColor: "white",
-      justifyContent: "center",
-      alignItems: "center",
-      borderWidth: 1,
-      borderColor: "#8b15b9",
-
-      elevation: 1,
   
       shadowColor: "#000",
       shadowOpacity: 0.1,

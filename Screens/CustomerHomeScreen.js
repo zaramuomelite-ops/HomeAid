@@ -130,8 +130,6 @@ useEffect(() => {
     return "Good Evening,"
   }
 
-  
-
   return (
 
       <ScrollView 
@@ -144,6 +142,7 @@ useEffect(() => {
         userName={customer.userName}
         location={customer.location}
         darkMode={darkMode}
+        navigation={navigation}
         toggleTheme={toggleTheme}
         onNotificationPress={() => {}}
         />

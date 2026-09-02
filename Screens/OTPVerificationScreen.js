@@ -1,14 +1,23 @@
-import { View, Text, StyleSheet, Image, Pressable, TextInput } from "react-native";
+import { View, 
+         Text, 
+         StyleSheet, 
+         Image,
+         Pressable, 
+         TextInput, 
+         ScrollView, 
+         KeyboardAvoidingView,
+         Platform,} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRef, useState } from "react";
 import InputField from "../components/InputField";
 import PrimaryButton from "../components/PrimaryButton";
 
-export default function OTPVerificationScreenH({ navigation, route }) {
+export default function OTPVerificationScreen({ navigation, route }) {
   const { phoneNumber } = route.params;
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [otp, setOtp] = useState(["", "", "", "", ""]);
   const inputRefs = useRef([]);
-  const CORRECT_OTP = "080710"
+  const { userType } = route.params || {};
+  const CORRECT_OTP = "08071"
 
   function handleOtpChange(text, index) {
     const newOtp = [...otp];
@@ -25,10 +34,10 @@ export default function OTPVerificationScreenH({ navigation, route }) {
   function verifyHandler() {
     const otpCode = otp.join("");
   
-    if (otpCode.length !== 6) {
-      alert("Please enter the 6-digit verification code.");
+    if (otpCode.length !== 5) {
+      alert("Please enter the 5-digit verification code.");
       return;
-    }
+    } 
 
     if (otpCode !== CORRECT_OTP){
       alert("Incorrect Verification Code")
@@ -37,17 +46,33 @@ export default function OTPVerificationScreenH({ navigation, route }) {
   
     console.log("OTP Verified:", otpCode);
   
-    navigation.replace("CustomerHome");
+    if (userType === "customer") {
+      navigation.replace("CustomerHome");
+    } else if (userType === "artisan") {
+      navigation.replace("ArtisanVerification", {
+        status: "received",
+      });
+    }
   }
   return (
+    <KeyboardAvoidingView
+      style={styles.screen}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+    >
+      <ScrollView
+        contentContainerStyle = {styles.container}
+        showsVerticalScrollIndicator = {false}
+        keyboardShouldPersistTaps = "handled"
+        >
     <View style={styles.container}>
       <Pressable
         style={styles.back}
         onPress={() => navigation.goBack()}
       >
         <Ionicons
-          name="arrow-back"
-          size={30}
+           name="arrow-back"
+           size={30}
           color="#8b15b9"
         />
       </Pressable>
@@ -103,15 +128,22 @@ export default function OTPVerificationScreenH({ navigation, route }) {
         Verify
       </PrimaryButton>
     </View>
+
+    </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
     backgroundColor: "#ebcce823",
+  },
+  
+  container: {
     alignItems: "center",
     paddingHorizontal: 20,
+    paddingBottom: 40,
   },
 
   back: {

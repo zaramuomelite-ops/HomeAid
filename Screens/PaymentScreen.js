@@ -268,8 +268,11 @@ export default function BookingConfirmedScreen({ route, navigation }) {
         <Pressable
           style={styles.chatButton}
           onPress={() =>
-            navigation.navigate("Messages", {
-              professional: professional,
+            navigation.navigate("CustomerHome", {
+               screen: "Messages",
+               params: {
+                professional: professional,
+               },
             })
           }
         >

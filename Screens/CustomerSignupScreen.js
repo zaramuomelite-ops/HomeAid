@@ -1,4 +1,11 @@
-import {Text, View, Image,StyleSheet, Pressable, ScrollView} from "react-native";
+import {Text, 
+        View, 
+        Image,
+        StyleSheet, 
+        Pressable, 
+        ScrollView,
+        KeyboardAvoidingView,
+        Platform,} from "react-native";
 import PrimaryButton from "../components/PrimaryButton";
 import InputField from "../components/InputField";
 import { Ionicons } from "@expo/vector-icons";
@@ -11,11 +18,17 @@ export default function CustomerSignupScreen({navigation}) {
   const [email, setEmail] = useState ("")
   const [password, setPassword] = useState ("")
   const [confirmPassword, setConfirmPassword] = useState ("")
+  const [location, setLocation] = useState("")
+  const [birthDate, setBirthDate] = useState ("")
+  const [gender, setGender] = useState ("")
 
   const [nameError, setNameError] = useState ("")
   const [phoneError, setPhoneError] = useState ("")
+  const [locationError, setLocationError] = useState ("")
+  const [birthDateError, setBirthDateError] = useState ("")
   const [emailError, setEmailError] = useState ("")
   const [passwordError, setPasswordError] = useState ("")
+  const [genderError, setGenderError] = useState ("")
   const [confirmPasswordError, setConfirmPasswordError] = useState ("")
   const [loading, setLoading] = useState(false)
 
@@ -23,6 +36,7 @@ export default function CustomerSignupScreen({navigation}) {
   const phoneRegex = /^[0-9]{10}$/;
   const nameRegex = /^[A-Za-z\s'-]+$/;
   const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/;
+  const birthDateRegex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
 
   function signUpHandler() {
    let valid = true
@@ -37,13 +51,30 @@ export default function CustomerSignupScreen({navigation}) {
     setNameError("")
    }
 
+   if (location.trim() === ""){
+    setLocationError ("This field is required");
+    valid = false;
+   } else {
+    setLocationError("")
+   }
+
+
+   if (birthDate.trim() === ""){
+    setBirthDateError ("This field is required");
+    valid = false;
+   }else if (gender !== male || female){
+    setGenderError("Input the your gen");
+    valid = false
+   } else {
+    setBirthDateError("")
+   }
+
    if (phoneNumber.trim() === ""){
     setPhoneError ("This field is required");
     valid = false
    }else if(!phoneRegex.test(phoneNumber.trim())){
     setPhoneError ("Enter a valid 10-digit phone number");
     valid = false
-
    }else{
     setPhoneError("")
    }
@@ -57,6 +88,13 @@ export default function CustomerSignupScreen({navigation}) {
    }else{
     setEmailError("")
    }
+
+   if (gender === "") {
+    setGenderError("Please select your gender");
+    valid = false;
+  } else {
+    setGenderError("");
+  }
 
    if (password.trim() === ""){
     setPasswordError ("This field is required");
@@ -91,21 +129,30 @@ export default function CustomerSignupScreen({navigation}) {
           userName,
           phoneNumber,
           email,
-          location: "Lagos, Nigeria"
+          birthDate,
+          location,
+          gender,
         })
       );
 
       setLoading(false)
       navigation.navigate("OTPVerification",{
+        userType: "customer",
         phoneNumber,
       });
     }, 2000)
     }
   }
     return (
+      <KeyboardAvoidingView
+          style={styles.screen}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+        >
         <ScrollView 
         contentContainerStyle={styles.container}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps = "handled">
             <Pressable
             style = {styles.back}
             onPress={() => navigation.goBack()}>
@@ -139,7 +186,7 @@ export default function CustomerSignupScreen({navigation}) {
               error={!!nameError}
               errorMessage={nameError}
               onChangeText={(text) =>
-                            setUserName(text.replace(/[^A-Za-z\s'-]/g, ""))}
+              setUserName(text.replace(/[^A-Za-z\s'-]/g, ""))}
             />
            
            <InputField
@@ -154,6 +201,25 @@ export default function CustomerSignupScreen({navigation}) {
               onChangeText={setPhoneNumber}
             />
 
+            <InputField
+              label="Date Of Birth"
+              placeholder="date/month/year"
+              icon="calendar"
+              value={birthDate}
+              error={!!birthDateError}
+              errorMessage={birthDateError}
+              onChangeText={setBirthDate}
+            />
+
+           <InputField
+              label="Location"
+              placeholder="Enter your location"
+              icon="location-outline"
+              value={location}
+              onChangeText={setLocation}
+              error={!!locationError}
+              errorMessage={locationError}
+          />
           <InputField
               label="Email Address"
               placeholder="Enter your email"
@@ -164,7 +230,7 @@ export default function CustomerSignupScreen({navigation}) {
               errorMessage={emailError}
           />
 
-          <InputField
+           <InputField
               label="Password"
               placeholder="Enter your password"
               secureTextEntry={true}
@@ -176,14 +242,83 @@ export default function CustomerSignupScreen({navigation}) {
 
 
           <InputField
-          label="Confirm Password"
-          placeholder="Confirm your password"
-          secureTextEntry={true}
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-          error={!!confirmPasswordError}
-          errorMessage={confirmPasswordError}
-          />
+            label="Confirm Password"
+            placeholder="Confirm your password"
+            secureTextEntry={true}
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            error={!!confirmPasswordError}
+            errorMessage={confirmPasswordError}
+           />
+
+            <View style={styles.genderContainer}>
+
+            <Text style={styles.genderLabel}>
+              Gender
+            </Text>
+
+            <View style={styles.genderOptions}>
+
+              <Pressable
+                style={[
+                  styles.genderOption,
+                  gender === "Male" && styles.genderOptionSelected,
+                ]}
+                onPress={() => {
+                  setGender("Male");
+                  setGenderError("");
+                }}
+              >
+                <Ionicons
+                  name={
+                    gender === "Male"
+                      ? "radio-button-on"
+                      : "radio-button-off"
+                  }
+                  size={22}
+                  color="#8b15b9"
+                />
+
+                <Text style={styles.genderText}>
+                  Male
+                </Text>
+              </Pressable>
+
+
+              <Pressable
+                style={[
+                  styles.genderOption,
+                  gender === "Female" && styles.genderOptionSelected,
+                ]}
+                onPress={() => {
+                  setGender("Female");
+                  setGenderError("");
+                }}
+              >
+                <Ionicons
+                  name={
+                    gender === "Female"
+                      ? "radio-button-on"
+                      : "radio-button-off"
+                  }
+                  size={22}
+                  color="#8b15b9"
+                />
+
+                <Text style={styles.genderText}>
+                  Female
+                </Text>
+              </Pressable>
+
+            </View>
+
+            {genderError ? (
+              <Text style={styles.errorText}>
+                {genderError}
+              </Text>
+            ) : null}
+
+            </View>
 
         <PrimaryButton
         onPress={signUpHandler}
@@ -217,6 +352,7 @@ export default function CustomerSignupScreen({navigation}) {
         </View>
                           
         </ScrollView>
+        </KeyboardAvoidingView>
     )
 }
 
@@ -263,15 +399,52 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
 
-  
-  forget: {
-    marginLeft: 230,
-    marginBottom:20,
-    marginTop: 1,
-    color: "#9226a0",
-    textDecorationLine: "underline"
+  genderContainer: {
+    width: "90%",
+    marginTop: 10,
+    marginBottom: 30,
   },
-
+  
+  genderLabel: {
+    fontSize: 15,
+    fontWeight: "700",
+    color:"#8b15b9",
+    marginBottom: 10,
+  },
+  
+  genderOptions: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  
+  genderOption: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 14,
+    paddingHorizontal: 15,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 14,
+    backgroundColor: "#fff",
+  },
+  
+  genderOptionSelected: {
+    borderColor: "#8b15b9",
+    backgroundColor: "#f8effb",
+  },
+  
+  genderText: {
+    marginLeft: 8,
+    fontSize: 15,
+    color: "#333",
+  },
+  
+  errorText: {
+    color: "#d32f2f",
+    fontSize: 12,
+    marginTop: 6,
+  },
 
   sub: {
     color: "#9226a0",
@@ -305,7 +478,8 @@ const styles = StyleSheet.create({
   card: {
    backgroundColor: "#8a15b911",
    width: 350,
-   borderRadius: 15
+   borderRadius: 15,
+   marginBottom: 20,
   },
 
   logIn: {

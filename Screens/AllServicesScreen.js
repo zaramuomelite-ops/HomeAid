@@ -108,6 +108,8 @@ import {
       fontSize: 28,
       fontWeight: "700",
       color: "#54275f",
+      marginHorizontal: 80,
+      marginTop: -50,
     },
   
     subtitle: {
@@ -115,6 +117,7 @@ import {
       color: "#777",
       marginTop: 5,
       marginBottom: 20,
+      marginHorizontal: 70,
     },
   
     sectionTitle: {
@@ -128,7 +131,7 @@ import {
     grid: {
       flexDirection: "row",
       flexWrap: "wrap",
-      
+      marginLeft: 15
     },
 
     serviceItem: {

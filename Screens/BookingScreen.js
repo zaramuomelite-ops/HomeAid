@@ -8,12 +8,14 @@ import {
   TextInput,
   Modal,
 } from "react-native";
-
+import { useState, useCallback, useRef } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
 
 export default function BookingScreen({ route, navigation }) {
   const professional = route.params?.professional;
+
+  const scrollViewRef = useRef(null);
 
   const [selectedDate, setSelectedDate] = useState( new Date(2026, 7, 1));
   const [selectedTime, setSelectedTime] = useState({time: "10:00", period: "AM",});
@@ -46,6 +48,15 @@ export default function BookingScreen({ route, navigation }) {
   const bookingFee = 1000;
   const totalAmount = serviceFee + bookingFee;
 
+  useFocusEffect(
+    useCallback(() => {
+      scrollViewRef.current?.scrollTo({
+        y: 0,
+        animated: false,
+      });
+    }, [])
+  );
+
   if (!professional) {
     return (
       <View style={styles.noProfessionalContainer}>
@@ -68,7 +79,7 @@ export default function BookingScreen({ route, navigation }) {
           onPress={() => navigation.goBack()}
         >
           <Text style={styles.backButtonText}>
-            Go Back
+           Go Back
           </Text>
         </Pressable>
       </View>
@@ -117,6 +128,7 @@ export default function BookingScreen({ route, navigation }) {
 
 
       <ScrollView
+         ref={scrollViewRef}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}
       >
@@ -294,12 +306,7 @@ export default function BookingScreen({ route, navigation }) {
                 {item.date}
               </Text>
 
-              <View
-                style={[
-                  styles.dateDot,
-                  selected && styles.selectedDot,
-                ]}
-              />
+              
 
             </Pressable>
           );
@@ -538,6 +545,12 @@ export default function BookingScreen({ route, navigation }) {
               onPress={() =>
                 navigation.navigate("Messages", {
                   professional: professional,
+                  selectedDate: selectedDate.toISOString(),
+                  selectedTime: selectedTime,
+                  serviceFee: serviceFee,
+                  bookingFee: bookingFee,
+                  totalAmount: totalAmount,
+                  serviceAddress: "57 Marina, UBA House, Lagos Island",
                 })
               }
             >
@@ -1296,9 +1309,8 @@ const styles = StyleSheet.create({
 
   badges: {
     flexDirection: "row",
-    gap: 8,
+    gap: 2,
     marginTop: 12,
-    flexWrap: "wrap",
   },
 
   badge: {
@@ -1334,7 +1346,7 @@ const styles = StyleSheet.create({
   },
 
   sectionTitle: {
-    fontSize: 19,
+    fontSize: 15,
     fontWeight: "700",
     color: "#211822",
   },
@@ -1377,7 +1389,7 @@ const styles = StyleSheet.create({
 
   dateCard: {
     width: 58,
-    height: 68,
+    height: 58,
     borderRadius: 12,
     backgroundColor: "#fff",
     justifyContent: "center",
@@ -1404,20 +1416,8 @@ const styles = StyleSheet.create({
     color: "#444",
   },
   
-  dateDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: "#8b15b9",
-    marginTop: 4,
-  },
-
   selectedText: {
     color: "#8b15b9",
-  },
-
-  selectedDot: {
-    backgroundColor: "#8b15b9",
   },
 
 
@@ -1549,12 +1549,12 @@ const styles = StyleSheet.create({
   },
 
   paymentLabel: {
-    fontSize: 16,
+    fontSize: 15,
     color: "#29232c",
   },
 
   paymentAmount: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "600",
     color: "#222",
   },
@@ -1572,13 +1572,13 @@ const styles = StyleSheet.create({
   },
 
   totalLabel: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "700",
     color: "#211822",
   },
 
   totalAmount: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "700",
     color: "#8b15b9",
   },

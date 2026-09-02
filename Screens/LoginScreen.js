@@ -1,4 +1,10 @@
-import {Text, View, Image,StyleSheet, ScrollView} from "react-native";
+import {Text, 
+        View,
+        Image,
+        StyleSheet, 
+        ScrollView, 
+        KeyboardAvoidingView,
+        Platform} from "react-native";
 import PrimaryButton from "../components/PrimaryButton";
 import InputField from "../components/InputField";
 import { Pressable } from "react-native"
@@ -68,9 +74,16 @@ export default function LoginScreen({navigation}) {
   }
 
     return (
+      <KeyboardAvoidingView
+        style={styles.screen}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}>
+   
         <ScrollView
               contentContainerStyle={styles.container}
-              showsVerticalScrollIndicator={false}>
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps = "handled"
+              >
                
                <Pressable 
                         style ={styles.back}
@@ -166,6 +179,7 @@ export default function LoginScreen({navigation}) {
 </View>
 
        </ScrollView>
+       </KeyboardAvoidingView>
     )
   }
 
