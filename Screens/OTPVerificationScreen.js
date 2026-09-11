@@ -13,21 +13,19 @@ import InputField from "../components/InputField";
 import PrimaryButton from "../components/PrimaryButton";
 
 export default function OTPVerificationScreen({ navigation, route }) {
-  const { phoneNumber } = route.params;
   const [otp, setOtp] = useState(["", "", "", "", ""]);
   const inputRefs = useRef([]);
-  const { userType } = route.params || {};
+  const { userType, phoneNumber } = route.params || {};
   const CORRECT_OTP = "08071"
 
   function handleOtpChange(text, index) {
+    const cleanText = text.replace(/[^0-9]/g, "");
     const newOtp = [...otp];
-  
     newOtp[index] = text;
-  
     setOtp(newOtp);
   
     if (text && index < 5) {
-      inputRefs.current[index + 1].focus();
+      inputRefs.current[index + 1]?.focus();
     }
   }
 
@@ -49,11 +47,14 @@ export default function OTPVerificationScreen({ navigation, route }) {
     if (userType === "customer") {
       navigation.replace("CustomerHome");
     } else if (userType === "artisan") {
-      navigation.replace("ArtisanVerification", {
+      navigation.replace("ArtisanHome", {
         status: "received",
       });
     }
+
   }
+
+ 
   return (
     <KeyboardAvoidingView
       style={styles.screen}
@@ -106,7 +107,17 @@ export default function OTPVerificationScreen({ navigation, route }) {
                 maxLength={1}
                 value={digit}
                 onChangeText={(text) => handleOtpChange(text, index)}
-                />
+
+                onKeyPress={({ nativeEvent }) => {
+                  if (
+                    nativeEvent.key === "Backspace" &&
+                    !digit &&
+                    index > 0
+                  ) {
+                    inputRefs.current[index - 1]?.focus();
+                  }
+                }}
+                 />
 
             ))}
 

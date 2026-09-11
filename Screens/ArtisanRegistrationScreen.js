@@ -12,16 +12,14 @@ import  AsyncStorage  from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 
-export default function CustomerSignupScreen({navigation}) {
+export default function ArtisanSignupScreen({navigation}) {
   const [userName, setUserName] = useState ("")
   const [phoneNumber, setPhoneNumber] = useState ("")
   const [email, setEmail] = useState ("")
   const [password, setPassword] = useState ("")
   const [confirmPassword, setConfirmPassword] = useState ("")
-  const [profession, setProfession] = useState("");
-  const [experience, setExperience] = useState("");
   const [state, setState] = useState("");
-  const [city, setCity] = useState("");
+  const [profession, setProfession] = useState("");
   const [birthDate, setBirthDate] = useState ("")
   const [gender, setGender] = useState ("")
 
@@ -30,10 +28,8 @@ export default function CustomerSignupScreen({navigation}) {
   const [emailError, setEmailError] = useState ("")
   const [passwordError, setPasswordError] = useState ("")
   const [confirmPasswordError, setConfirmPasswordError] = useState ("")
-  const [professionError, setProfessionError] = useState("");
-  const [experienceError, setExperienceError] = useState("");
   const [stateError, setStateError] = useState("");
-  const [cityError, setCityError] = useState("");
+  const [professionError, setProfessionError] = useState("");
   const [genderError, setGenderError] = useState ("")
   const [birthDateError, setBirthDateError] = useState ("")
   const [loading, setLoading] = useState(false);
@@ -77,6 +73,13 @@ export default function CustomerSignupScreen({navigation}) {
     setEmailError("")
    }
 
+   if (profession === "") {
+    setProfessionError("This field is required");
+    valid = false;
+  } else {
+    setProfessionError("");
+  }
+
    if (gender === "") {
     setGenderError("Please select your gender");
     valid = false;
@@ -87,9 +90,6 @@ export default function CustomerSignupScreen({navigation}) {
   if (birthDate.trim() === ""){
     setBirthDateError ("This field is required");
     valid = false;
-   }else if (gender !== male || female){
-    setGenderError("Input the your gen");
-    valid = false
    } else {
     setBirthDateError("")
    }
@@ -100,7 +100,7 @@ export default function CustomerSignupScreen({navigation}) {
    }else if (password.length < 8){
     setPasswordError("Password should be at least 8 characters")
     valid = false;
-   }else if (!passwordRegex.test(password.trim)){
+   }else if (!passwordRegex.test(password.trim())){
     setPasswordError ("Password not strong enough");
     valid = false;
    }else{
@@ -114,32 +114,11 @@ export default function CustomerSignupScreen({navigation}) {
     setConfirmPasswordError("")
    }
 
-   if (profession.trim() === ""){
-    setProfessionError ("This field is required");
-    valid = false
-   }else{
-    setProfessionError("")
-   }
-
-   if (experience.trim() === ""){
-    setExperienceError ("This field is required");
-    valid = false
-   }else{
-    setConfirmPasswordError("")
-   }
-
    if (state.trim() === ""){
     setStateError ("This field is required");
     valid = false
    }else{
     setStateError("")
-   }
-
-   if (city.trim() === ""){
-    setCityError ("This field is required");
-    valid = false
-   }else{
-    setCityError("")
    }
 
    if(valid){
@@ -152,7 +131,6 @@ export default function CustomerSignupScreen({navigation}) {
           userName,
           phoneNumber,
           email,
-          city,
           state,
           gender,
           birthDate,
@@ -266,25 +244,15 @@ export default function CustomerSignupScreen({navigation}) {
             errorMessage={confirmPasswordError}
           />
 
-        <InputField
+          <InputField
             label="Profession"
-            placeholder="e.g. Electrician"
+            placeholder="Service you would like to offer"
             icon="construct-outline"
             value={profession}
             onChangeText={setProfession}
             error={!!professionError}
             errorMessage={professionError}
-        />
-
-        <InputField
-            label="Years of Experience"
-            placeholder="e.g. 2 Years"
-            icon="briefcase-outline"
-            value={experience}
-            onChangeText={setExperience}
-            error={!!experienceError}
-            errorMessage={experienceError}
-        />
+          />
 
         <InputField
             label="State"
@@ -294,16 +262,6 @@ export default function CustomerSignupScreen({navigation}) {
             onChangeText={setState}
             error={!!stateError}
             errorMessage={stateError}
-        />
-
-        <InputField
-            label="City/LGA"
-            placeholder="Enter your city"
-            icon="location-outline"
-            value={city}
-            onChangeText={setCity}
-            error={!!cityError}
-            errorMessage={cityError}
         />
 
          <View style={styles.genderContainer}>
@@ -377,6 +335,8 @@ export default function CustomerSignupScreen({navigation}) {
 
         <PrimaryButton
         onPress={registerHandler}
+        disabled = {loading}
+        loading = {loading}
         >
         Register Account
         </PrimaryButton>
@@ -410,20 +370,20 @@ export default function CustomerSignupScreen({navigation}) {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        backgroundColor: "#ebcce823",
-        alignItems: "center",
-       
-      },
+container: {
+    backgroundColor: "#ebcce823",
+    alignItems: "center",
+    
+  },
 
-      logo: {
-        width: 200,
-        height: 200,
-        resizeMode: "contain",
-        
-      },
+  logo: {
+    width: 200,
+    height: 200,
+    resizeMode: "contain",
+    
+  },
 
-   back: {
+  back: {
     alignSelf: "flex-start",
     marginTop: 50,
     marginLeft: 20,
@@ -502,6 +462,12 @@ const styles = StyleSheet.create({
 
   text: {
     marginRight: 50
+  },
+
+  errorText: {
+    color: "#d32f2f",
+    fontSize: 12,
+    marginTop: 6,
   },
 
   genderContainer: {

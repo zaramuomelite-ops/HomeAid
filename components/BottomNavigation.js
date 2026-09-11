@@ -1,7 +1,9 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet } from "react-native";
+
 import CustomerHomeScreen from "../Screens/CustomerHomeScreen";
+import ArtisanHomeScreen from "../Screens/ArtisanHomeScreen";
+
 import BookingScreen from "../Screens/BookingScreen";
 import MessageScreen from "../Screens/MessageScreen";
 import ProfileScreen from "../Screens/ProfileScreen";
@@ -9,18 +11,37 @@ import SOSScreen from "../Screens/SOSScreen";
 
 const Tab = createBottomTabNavigator();
 
-export default function BottomNavigation() {
+export default function BottomNavigation({ userType = "customer" }) {
+
+  const isArtisan = userType === "artisan";
+
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
+
         tabBarActiveTintColor: "#8b15b9",
         tabBarInactiveTintColor: "#888",
+
+        tabBarStyle: {
+          height: 70,
+          paddingBottom: 8,
+          paddingTop: 8,
+          backgroundColor: "#fff",
+          borderTopWidth: 0,
+          elevation: 10,
+        },
       }}
     >
+
+      {/* HOME */}
       <Tab.Screen
         name="Home"
-        component={CustomerHomeScreen}
+        component={
+          isArtisan
+            ? ArtisanHomeScreen
+            : CustomerHomeScreen
+        }
         options={{
           tabBarIcon: ({ color, size }) => (
             <Ionicons
@@ -32,6 +53,7 @@ export default function BottomNavigation() {
         }}
       />
 
+      {/* BOOKINGS */}
       <Tab.Screen
         name="Bookings"
         component={BookingScreen}
@@ -46,20 +68,22 @@ export default function BottomNavigation() {
         }}
       />
 
+      {/* SOS */}
       <Tab.Screen
         name="SOS"
         component={SOSScreen}
         options={{
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: () => (
             <Ionicons
               name="alert-circle"
-              size={size}
+              size={38}
               color="#8b15b9"
             />
           ),
         }}
       />
 
+      {/* MESSAGES */}
       <Tab.Screen
         name="Messages"
         component={MessageScreen}
@@ -74,6 +98,7 @@ export default function BottomNavigation() {
         }}
       />
 
+      {/* PROFILE */}
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
@@ -85,42 +110,10 @@ export default function BottomNavigation() {
               color={color}
             />
           ),
-        }}
+        }} 
+
       />
+
     </Tab.Navigator>
   );
 }
-
-const styles = StyleSheet.create({
-  tabBar: {
-    height: 70,
-    paddingBottom: 8,
-    paddingTop: 8,
-    backgroundColor: "#fff",
-    borderTopWidth: 0,
-    elevation: 10,
-  },
-
-  sosButton: {
-    width: 75,
-    height: 75,
-    borderRadius: 40,
-    backgroundColor: "#8b15b9",
-    justifyContent: "center",
-    alignItems: "center",
-
-    marginTop: -30,
-
-    borderWidth: 6,
-    borderColor: "#fff",
-
-    elevation: 8,
-  },
-
-  sosText: {
-    color: "#fff",
-    fontSize: 13,
-    fontWeight: "bold",
-    marginTop: 2,
-  },
-});

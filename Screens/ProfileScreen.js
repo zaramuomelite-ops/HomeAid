@@ -285,7 +285,7 @@ export default function ProfileScreen({ navigation }) {
             icon="wallet-outline"
             iconColor="#20a85a"
             backgroundColor="#e4f8e9"
-            title="Cashback"
+            title="Wallet"
             subtitle="Check your cashback balance and history"
             onPress={() =>
               navigation.navigate("Cashback")

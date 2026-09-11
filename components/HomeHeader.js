@@ -12,13 +12,17 @@ export default function HomeHeader({
        darkMode,
        onNotificationPress,
        navigation,
+       userType,
 }){
 
   const [profileImage, setProfileImage] = useState(null);
 
   const loadProfileImage = async () => {
     try {
-      const savedData = await AsyncStorage.getItem("customerData");
+     const storageKey =
+       userType === "artisan" ? "artisanData" : "customerData";
+      
+      const saveData = await AsyncStorage.getItem(storageKey)
   
       if (savedData) {
         const customerData = JSON.parse(savedData);
@@ -30,10 +34,11 @@ export default function HomeHeader({
     }
   };
 
+
   useFocusEffect(
     useCallback(() => {
       loadProfileImage();
-    }, [])
+    }, [userType])
   );
 
   const handleProfilePress = () => {
@@ -68,7 +73,7 @@ export default function HomeHeader({
                       </Text>
 
                       <Text style = {styles.name}>
-                        {userName} 👋 
+                        {userName}👋 
                       </Text>
                  </View>
                   
@@ -167,7 +172,7 @@ const styles = StyleSheet.create({
 
    
     name: {
-      fontSize: 30,
+      fontSize: 25,
       fontWeight: "bold",
       color: "#54275f",
       marginTop: 5,

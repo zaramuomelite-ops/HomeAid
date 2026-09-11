@@ -1,620 +1,688 @@
 import {
-    View,
-    Text,
-    StyleSheet,
-    SafeAreaView,
-    Pressable,
-  } from "react-native";
-  
-  import { Ionicons } from "@expo/vector-icons";
-  import { useState } from "react";
-  
-  export default function ArtisanVerificationScreen({
-    navigation,
-    route,
-  }) {
-    const [status, setStatus] = useState(
-      route?.params?.status || "received"
-    );
-  
-    const renderContent = () => {
-      // APPLICATION RECEIVED
-      if (status === "received") {
-        return (
-          <>
-            <View style={styles.iconCircle}>
-              <Ionicons
-                name="checkmark"
-                size={45}
-                color="#6C4AB6"
-              />
-            </View>
-  
-            <Text style={styles.title}>
-              Application Received
-            </Text>
-  
-            <Text style={styles.description}>
-              Your artisan application has been successfully
-              received and is currently being reviewed by our
-              team.
-            </Text>
-  
-            <View style={styles.infoCard}>
-              <Ionicons
-                name="time-outline"
-                size={25}
-                color="#6C4AB6"
-              />
-  
-              <View style={styles.infoTextContainer}>
-                <Text style={styles.infoTitle}>
-                  Review Process
-                </Text>
-  
-                <Text style={styles.infoText}>
-                  Your application will be reviewed within
-                  48 hours.
-                </Text>
-              </View>
-            </View>
-  
-            <View style={styles.infoCard}>
-              <Ionicons
-                name="mail-outline"
-                size={25}
-                color="#6C4AB6"
-              />
-  
-              <View style={styles.infoTextContainer}>
-                <Text style={styles.infoTitle}>
-                  Stay Updated
-                </Text>
-  
-                <Text style={styles.infoText}>
-                  We'll send you an email once your application
-                  has been reviewed.
-                </Text>
-              </View>
-            </View>
-  
-            <Text style={styles.bottomText}>
-              You can safely close the app while your
-              application is being reviewed.
-            </Text>
-  
-            <Pressable
-              style={styles.button}
-              onPress={() => setStatus("pending")}
-            >
-              <Text style={styles.buttonText}>
-                Continue
-              </Text>
-            </Pressable>
-          </>
-        );
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  TextInput,
+  Platform,
+  KeyboardAvoidingView,
+  ActivityIndicator,
+  ScrollView,
+} from "react-native";
+
+import { useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
+
+export default function ArtisanProfessionalVerificationScreen({
+  navigation,
+}) {
+  const [nin, setNin] = useState("");
+  const [profession, setProfession] = useState("");
+  const [experience, setExperience] = useState("");
+  const [workDescription, setWorkDescription] = useState("");
+  const [location, setLocation] = useState("");
+
+  const [proofType, setProofType] = useState("");
+  const [proofLink, setProofLink] = useState("");
+
+  const [loading, setLoading] = useState(false);
+
+  const [proofError, setProofError] = useState("");
+
+  const handleNinChange = (text) => {
+    const numbersOnly = text.replace(/[^0-9]/g, "");
+    setNin(numbersOnly.slice(0, 11));
+  };
+
+  const handleSubmit = async () => {
+    if (
+      !nin ||
+      !profession ||
+      !experience ||
+      !workDescription ||
+      !location ||
+      !proofType
+    ) {
+      alert("Please complete all required fields.");
+      return;
+    }
+
+    if (nin.length !== 11) {
+      alert("NIN must be exactly 11 digits.");
+      return;
+    }
+
+    if (proofType === "link" && !proofLink.trim()) {
+      alert("Please provide your portfolio link.");
+      return;
+    }
+
+    if (!proofType) {
+      setProofError("Proof of work is required.");
+      return;
+    }
+    
+    if (proofType === "upload" && !selectedFile) {
+      setProofError("Please upload your proof of work.");
+      return;
+    }
+    
+    if (proofType === "link") {
+      const isValidUrl = urlRegex.test(proofLink.trim());
+    
+      if (!isValidUrl) {
+        setProofError("Please enter a valid portfolio link.");
+        return;
       }
-  
-      // APPLICATION PENDING
-      if (status === "pending") {
-        return (
-          <>
-            <View style={styles.iconCircle}>
-              <Ionicons
-                name="hourglass-outline"
-                size={43}
-                color="#6C4AB6"
-              />
-            </View>
-  
-            <Text style={styles.title}>
-              Application Under Review
-            </Text>
-  
-            <Text style={styles.description}>
-              We're currently reviewing your artisan
-              application.
-            </Text>
-  
-            <View style={styles.statusCard}>
-              <View style={styles.statusRow}>
-                <View style={styles.statusIcon}>
-                  <Ionicons
-                    name="checkmark"
-                    size={20}
-                    color="#6C4AB6"
-                  />
-                </View>
-  
-                <View>
-                  <Text style={styles.statusTitle}>
-                    Application Received
-                  </Text>
-  
-                  <Text style={styles.statusSubtext}>
-                    Successfully submitted
-                  </Text>
-                </View>
-              </View>
-  
-              <View style={styles.verticalLine} />
-  
-              <View style={styles.statusRow}>
-                <View style={styles.statusIcon}>
-                  <Ionicons
-                    name="time-outline"
-                    size={20}
-                    color="#6C4AB6"
-                  />
-                </View>
-  
-                <View>
-                  <Text style={styles.statusTitle}>
-                    Under Review
-                  </Text>
-  
-                  <Text style={styles.statusSubtext}>
-                    Our team is reviewing your application
-                  </Text>
-                </View>
-              </View>
-  
-              <View style={styles.verticalLine} />
-  
-              <View style={styles.statusRow}>
-                <View style={styles.pendingCircle}>
-                  <Ionicons
-                    name="lock-closed-outline"
-                    size={17}
-                    color="#999"
-                  />
-                </View>
-  
-                <View>
-                  <Text style={styles.statusTitle}>
-                    Approval
-                  </Text>
-  
-                  <Text style={styles.statusSubtext}>
-                    Waiting for review to be completed
-                  </Text>
-                </View>
-              </View>
-            </View>
-  
-            <View style={styles.emailNotice}>
-              <Ionicons
-                name="mail-outline"
-                size={22}
-                color="#6C4AB6"
-              />
-  
-              <Text style={styles.emailText}>
-                You'll receive an email when your application
-                has been reviewed.
-              </Text>
-            </View>
-          </>
-        );
-      }
-  
-      // APPLICATION APPROVED
-      if (status === "approved") {
-        return (
-          <>
-            <View style={styles.iconCircle}>
-              <Ionicons
-                name="checkmark-circle"
-                size={48}
-                color="#6C4AB6"
-              />
-            </View>
-  
-            <Text style={styles.title}>
-              You're Approved! 🎉
-            </Text>
-  
-            <Text style={styles.description}>
-              Congratulations! Your artisan application has
-              been approved.
-            </Text>
-  
-            <View style={styles.successCard}>
-              <Ionicons
-                name="sparkles-outline"
-                size={28}
-                color="#6C4AB6"
-              />
-  
-              <Text style={styles.successText}>
-                You're now ready to start receiving jobs from
-                customers on HomeAidConnect.
-              </Text>
-            </View>
-  
-            <Pressable
-              style={styles.button}
-              onPress={() =>
-                navigation.replace("ArtisanHome")
-              }
-            >
-              <Text style={styles.buttonText}>
-                Continue to Home
-              </Text>
-  
-              <Ionicons
-                name="arrow-forward"
-                size={20}
-                color="#fff"
-              />
-            </Pressable>
-          </>
-        );
-      }
-  
-      // APPLICATION REJECTED
-      if (status === "rejected") {
-        return (
-          <>
-            <View style={styles.rejectedIconCircle}>
-              <Ionicons
-                name="close"
-                size={43}
-                color="#B54A4A"
-              />
-            </View>
-  
-            <Text style={styles.title}>
-              Application Not Approved
-            </Text>
-  
-            <Text style={styles.description}>
-              Unfortunately, your artisan application could
-              not be approved at this time.
-            </Text>
-  
-            <View style={styles.rejectedCard}>
-              <Text style={styles.rejectedTitle}>
-                Reason
-              </Text>
-  
-              <Text style={styles.rejectedText}>
-                Some information provided in your application
-                needs to be reviewed or updated.
-              </Text>
-            </View>
-  
-            <Pressable
-              style={styles.button}
-              onPress={() =>
-                navigation.replace("ArtisanRegister")
-              }
-            >
-              <Text style={styles.buttonText}>
-                Resubmit Application
-              </Text>
-            </Pressable>
-          </>
-        );
-      }
-    };
-  
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.content}>
-          {/* TOP ICON */}
-          <View style={styles.topIcon}>
+    }
+
+    setLoading(true);
+
+    try {
+      // I will send the information 
+      // to your backend.
+
+      await new Promise((resolve) => setTimeout(resolve, 2500));
+
+      navigation.replace("ArtisanVerification", {
+        status: "pending",
+      });
+    } catch (error) {
+      console.log("Submission error:", error);
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <KeyboardAvoidingView
+    style={styles.screen}
+    behavior={Platform.OS === "ios" ? "padding" : "height"}
+    keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+  >
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps= "handled"
+    >
+      {/* HEADER */}
+
+      <Pressable
+        style = {styles.back}
+        onPress={() => navigation.goBack()}>
+
+          <Ionicons
+          name="arrow-back"
+          size= {30}
+          color={"#8b15b9"}/>
+      </Pressable>
+
+      <View style={styles.headerIcon}>
+        <Ionicons
+          name="shield-checkmark-outline"
+          size={30}
+          color="#6C4AB6"
+        />
+      </View>
+
+      <Text style={styles.title}>
+        Professional Verification
+      </Text>
+
+      <Text style={styles.description}>
+        You're almost there! We need a few professional
+        details to verify your identity and experience
+        before you can be accepted as an <Text style={styles.homeText}>HomeAidConnect</Text> artisan.
+      </Text>
+
+      {/* PROGRESS */}
+
+      <View style={styles.progressContainer}>
+        <View style={styles.progressStep}>
+          <View style={styles.completedCircle}>
             <Ionicons
-              name="shield-checkmark-outline"
-              size={28}
-              color="#6C4AB6"
+              name="checkmark"
+              size={16}
+              color="#fff"
             />
           </View>
-  
-          {/* MAIN CONTENT */}
-          <View style={styles.mainContent}>
-            {renderContent()}
-          </View>
-  
-          {/* TEMPORARY TEST BUTTONS */}
-          {/* REMOVE THESE LATER */}
-  
-          <View style={styles.testButtons}>
-            <Text style={styles.testTitle}>
-              TEST STATUS
-            </Text>
-  
-            <View style={styles.testRow}>
-              <Pressable
-                style={styles.testButton}
-                onPress={() => setStatus("received")}
-              >
-                <Text style={styles.testButtonText}>
-                  Received
-                </Text>
-              </Pressable>
-  
-              <Pressable
-                style={styles.testButton}
-                onPress={() => setStatus("pending")}
-              >
-                <Text style={styles.testButtonText}>
-                  Pending
-                </Text>
-              </Pressable>
-  
-              <Pressable
-                style={styles.testButton}
-                onPress={() => setStatus("approved")}
-              >
-                <Text style={styles.testButtonText}>
-                  Approved
-                </Text>
-              </Pressable>
-  
-              <Pressable
-                style={styles.testButton}
-                onPress={() => setStatus("rejected")}
-              >
-                <Text style={styles.testButtonText}>
-                  Rejected
-                </Text>
-              </Pressable>
-            </View>
-          </View>
+
+          <Text style={styles.progressText}>
+            Account Details
+          </Text>
         </View>
-      </SafeAreaView>
-    );
-  }
+
+        <View style={styles.progressLine} />
+
+        <View style={styles.progressStep}>
+          <View style={styles.activeCircle}>
+            <Text style={styles.activeNumber}>2</Text>
+          </View>
+
+          <Text style={styles.progressText}>
+            Verification
+          </Text>
+        </View>
+      </View>
+
+      {/* NIN */}
+
+      <Text style={styles.label}>
+        NIN <Text style={styles.required}>*</Text>
+      </Text>
+
+      <View style={styles.inputContainer}>
+        <Ionicons
+          name="card-outline"
+          size={20}
+          color="#888"
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your 11-digit NIN"
+          placeholderTextColor="#aaa"
+          keyboardType="number-pad"
+          value={nin}
+          onChangeText={handleNinChange}
+          maxLength={11}
+        />
+      </View>
+
+      <Text style={styles.helperText}>
+        Your NIN is used only for identity verification.
+      </Text>
+
+      {/* PROFESSION */}
+
+      <Text style={styles.label}>
+        Profession <Text style={styles.required}>*</Text>
+      </Text>
+
+      <View style={styles.inputContainer}>
+        <Ionicons
+          name="construct-outline"
+          size={20}
+          color="#888"
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="e.g. Plumber, Electrician"
+          placeholderTextColor="#aaa"
+          value={profession}
+          onChangeText={setProfession}
+        />
+      </View>
+
+      {/* EXPERIENCE */}
+
+      <Text style={styles.label}>
+        Years of Experience <Text style={styles.required}>*</Text>
+      </Text>
+
+      <View style={styles.inputContainer}>
+        <Ionicons
+          name="briefcase-outline"
+          size={20}
+          color="#888"
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="e.g. 5 years"
+          placeholderTextColor="#aaa"
+          value={experience}
+          onChangeText={setExperience}
+        />
+      </View>
+
+      {/* LOCATION */}
+
+      <Text style={styles.label}>
+        Service Location <Text style={styles.required}>*</Text>
+      </Text>
+
+      <View style={styles.inputContainer}>
+        <Ionicons
+          name="location-outline"
+          size={20}
+          color="#888"
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Where do you provide services?"
+          placeholderTextColor="#aaa"
+          value={location}
+          onChangeText={setLocation}
+        />
+      </View>
+
+      {/* WORK DESCRIPTION */}
+
+      <Text style={styles.label}>
+        Tell us about your experience{" "}
+        <Text style={styles.required}>*</Text>
+      </Text>
+
+      <View style={[styles.inputContainer, styles.textAreaContainer]}>
+        <TextInput
+          style={[styles.input, styles.textArea]}
+          placeholder="Briefly describe your experience and the services you provide..."
+          placeholderTextColor="#aaa"
+          multiline
+          textAlignVertical="top"
+          value={workDescription}
+          onChangeText={setWorkDescription}
+        />
+      </View>
+
+      {/* PROOF */}
+
+      <Text style={styles.label}>
+      Proof of Work <Text style={styles.required}>*</Text>
+      </Text>
+
+    <View
+      style={[
+        styles.proofOptions,
+        proofError && styles.errorBorder,
+      ]}
+    >
+    <Pressable
+      style={[
+        styles.proofOption,
+        proofType === "upload" && styles.selectedProofOption,
+      ]}
+      onPress={() => {
+        setProofType("upload");
+        setProofError("");
+      }}
+    >
+      <Ionicons
+        name="cloud-upload-outline"
+        size={25}
+        color="#6C4AB6"
+      />
+
+      <Text style={styles.proofTitle}>
+        Upload Document
+      </Text>
+
+    <Text style={styles.proofSubtitle}>
+      PDF, image or résumé
+    </Text>
+      </Pressable>
+
+      <Pressable
+        style={[
+          styles.proofOption,
+          proofType === "link" && styles.selectedProofOption,
+        ]}
+        onPress={() => {
+          setProofType("link");
+          setProofError("");
+        }}
+      >
+        <Ionicons
+          name="link-outline"
+          size={25}
+          color="#6C4AB6"
+        />
+
+        <Text style={styles.proofTitle}>
+          Portfolio Link
+        </Text>
+
+        <Text style={styles.proofSubtitle}>
+          Website or online portfolio
+        </Text>
+      </Pressable>
+      </View>
+
+        {proofError ? (
+          <Text style={styles.errorText}>
+            {proofError}
+          </Text>
+        ) : null}
+
+          {/* PORTFOLIO LINK */}
+
+          {proofType === "link" && (
+            <View style={styles.inputContainer}>
+              <Ionicons
+                name="globe-outline"
+                size={20}
+                color="#888"
+              />
+
+          <TextInput
+            style={styles.input}
+            placeholder="https://yourportfolio.com"
+            placeholderTextColor="#aaa"
+            autoCapitalize="none"
+            keyboardType="url"
+            value={proofLink}
+            onChangeText={setProofLink}
+          />
+        </View>
+      )}
+
+      {/* UPLOAD BUTTON */}
+
+      {proofType === "upload" && (
+        <Pressable style={styles.uploadBox}>
+          <Ionicons
+            name="document-attach-outline"
+            size={32}
+            color="#6C4AB6"
+          />
+
+          <Text style={styles.uploadTitle}>
+            Choose a file
+          </Text>
+
+          <Text style={styles.uploadSubtitle}>
+            PDF, JPG or PNG
+          </Text>
+        </Pressable>
+      )}
+
+      {/* SUBMIT */}
+
+      <Pressable
+        style={[
+          styles.submitButton,
+          loading && styles.disabledButton,
+        ]}
+        onPress={handleSubmit}
+        disabled={loading}
+      >
+        {loading ? (
+          <>
+            <ActivityIndicator
+              size="small"
+              color="#fff"
+            />
+
+            <Text style={styles.buttonText}>
+              Submitting...
+            </Text>
+          </>
+        ) : (
+          <>
+            <Text style={styles.buttonText}>
+              Submit Application
+            </Text>
+
+            <Ionicons
+              name="arrow-forward"
+              size={20}
+              color="#fff"
+            />
+          </>
+        )}
+      </Pressable>
+
+      <Text style={styles.bottomText}>
+        By submitting, you confirm that the information
+        provided is accurate and belongs to you.
+      </Text>
+    </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: "#ebcce823",
+  },
+
+  container: {
+    flex: 1,
+    backgroundColor: "#FAF8FC",
+  },
+
   
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: "#FAF8FC",
-    },
-  
-    content: {
-      flex: 1,
-      paddingHorizontal: 22,
-      paddingTop: 20,
-    },
-  
-    topIcon: {
-      width: 52,
-      height: 52,
-      borderRadius: 26,
-      backgroundColor: "#F0EAF9",
-      justifyContent: "center",
-      alignItems: "center",
-      alignSelf: "center",
-      marginBottom: 20,
-    },
-  
-    mainContent: {
-      flex: 1,
-    },
-  
-    iconCircle: {
-      width: 90,
-      height: 90,
-      borderRadius: 45,
-      backgroundColor: "#F0EAF9",
-      justifyContent: "center",
-      alignItems: "center",
-      alignSelf: "center",
-      marginBottom: 22,
-    },
-  
-    rejectedIconCircle: {
-      width: 90,
-      height: 90,
-      borderRadius: 45,
-      backgroundColor: "#FBECEC",
-      justifyContent: "center",
-      alignItems: "center",
-      alignSelf: "center",
-      marginBottom: 22,
-    },
-  
-    title: {
-      fontSize: 27,
-      fontWeight: "700",
-      color: "#222",
-      textAlign: "center",
-      marginBottom: 12,
-    },
-  
-    description: {
-      fontSize: 15,
-      lineHeight: 23,
-      color: "#777",
-      textAlign: "center",
-      marginBottom: 25,
-    },
-  
-    infoCard: {
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: "#FFFFFF",
-      borderRadius: 17,
-      padding: 17,
-      marginBottom: 13,
-    },
-  
-    infoTextContainer: {
-      flex: 1,
-      marginLeft: 13,
-    },
-  
-    infoTitle: {
-      fontSize: 15,
-      fontWeight: "700",
-      color: "#222",
-      marginBottom: 4,
-    },
-  
-    infoText: {
-      fontSize: 13,
-      lineHeight: 19,
-      color: "#777",
-    },
-  
-    bottomText: {
-      fontSize: 13,
-      color: "#888",
-      textAlign: "center",
-      lineHeight: 19,
-      marginTop: 10,
-      marginBottom: 20,
-    },
-  
-    button: {
-      height: 55,
-      borderRadius: 15,
-      backgroundColor: "#6C4AB6",
-      justifyContent: "center",
-      alignItems: "center",
-      flexDirection: "row",
-      gap: 8,
-      marginTop: 15,
-    },
-  
-    buttonText: {
-      color: "#FFFFFF",
-      fontSize: 16,
-      fontWeight: "700",
-    },
-  
-    statusCard: {
-      backgroundColor: "#FFFFFF",
-      borderRadius: 18,
-      padding: 20,
-      marginBottom: 18,
-    },
-  
-    statusRow: {
-      flexDirection: "row",
-      alignItems: "center",
-    },
-  
-    statusIcon: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      backgroundColor: "#F0EAF9",
-      justifyContent: "center",
-      alignItems: "center",
-      marginRight: 13,
-    },
-  
-    pendingCircle: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      backgroundColor: "#F2F2F2",
-      justifyContent: "center",
-      alignItems: "center",
-      marginRight: 13,
-    },
-  
-    verticalLine: {
-      height: 25,
-      width: 1,
-      backgroundColor: "#DDD",
-      marginLeft: 20,
-      marginVertical: 4,
-    },
-  
-    statusTitle: {
-      fontSize: 14,
-      fontWeight: "700",
-      color: "#222",
-    },
-  
-    statusSubtext: {
-      fontSize: 12,
-      color: "#888",
-      marginTop: 3,
-    },
-  
-    emailNotice: {
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: "#F0EAF9",
-      borderRadius: 15,
-      padding: 15,
-    },
-  
-    emailText: {
-      flex: 1,
-      fontSize: 13,
-      color: "#555",
-      lineHeight: 19,
-      marginLeft: 10,
-    },
-  
-    successCard: {
-      backgroundColor: "#F0EAF9",
-      borderRadius: 18,
-      padding: 20,
-      alignItems: "center",
-      marginBottom: 20,
-    },
-  
-    successText: {
-      fontSize: 14,
-      lineHeight: 21,
-      color: "#555",
-      textAlign: "center",
-      marginTop: 10,
-    },
-  
-    rejectedCard: {
-      backgroundColor: "#FFFFFF",
-      borderRadius: 17,
-      padding: 18,
-      marginBottom: 15,
-    },
-  
-    rejectedTitle: {
-      fontSize: 15,
-      fontWeight: "700",
-      color: "#222",
-      marginBottom: 7,
-    },
-  
-    rejectedText: {
-      fontSize: 13,
-      color: "#777",
-      lineHeight: 20,
-    },
-  
-    testButtons: {
-      paddingBottom: 15,
-    },
-  
-    testTitle: {
-      fontSize: 10,
-      color: "#AAA",
-      textAlign: "center",
-      marginBottom: 7,
-    },
-  
-    testRow: {
-      flexDirection: "row",
-      justifyContent: "center",
-      gap: 5,
-    },
-  
-    testButton: {
-      paddingHorizontal: 8,
-      paddingVertical: 6,
-      borderRadius: 8,
-      backgroundColor: "#E9E2F4",
-    },
-  
-    testButtonText: {
-      fontSize: 9,
-      color: "#6C4AB6",
-    },
-  });
+   back: {
+    marginTop: 50,
+    marginLeft: 10,
+  },
+
+  content: {
+    paddingHorizontal: 22,
+    paddingTop: 25,
+    paddingBottom: 40,
+  },
+
+  headerIcon: {
+    width: 55,
+    height: 55,
+    borderRadius: 28,
+    backgroundColor: "#F0EAF9",
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "center",
+    marginBottom: 5,
+  },
+
+  title: {
+    fontSize: 26,
+    fontWeight: "700",
+    color: "#222",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+
+  homeText: {
+    color: "#8b15b9",
+  },
+
+  description: {
+    fontSize: 14,
+    color: "#777",
+    lineHeight: 21,
+    textAlign: "center",
+    marginBottom: 25,
+  },
+
+  progressContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 28,
+  },
+
+  progressStep: {
+    alignItems: "center",
+  },
+
+  completedCircle: {
+    width: 35,
+    height: 35,
+    borderRadius: 18,
+    backgroundColor: "#6C4AB6",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  activeCircle: {
+    width: 35,
+    height: 35,
+    borderRadius: 18,
+    backgroundColor: "#6C4AB6",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  activeNumber: {
+    color: "#fff",
+    fontWeight: "700",
+  },
+
+  progressLine: {
+    flex: 1,
+    height: 2,
+    backgroundColor: "#6C4AB6",
+    marginHorizontal: 8,
+    marginBottom: 18,
+  },
+
+  progressText: {
+    fontSize: 10,
+    color: "#666",
+    marginTop: 5,
+  },
+
+  label: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#6C4AB6",
+    marginBottom: 8,
+    marginTop: 12,
+  },
+
+  required: {
+    color: "#B54A4A",
+  },
+
+  inputContainer: {
+    minHeight: 52,
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 15,
+    borderWidth: 1,
+    borderColor: "#E7E2ED",
+  },
+
+  input: {
+    flex: 1,
+    fontSize: 14,
+    color: "#222",
+    marginLeft: 10,
+  },
+
+  helperText: {
+    fontSize: 11,
+    color: "#999",
+    marginTop: 5,
+    lineHeight: 17,
+  },
+
+  textAreaContainer: {
+    height: 110,
+    alignItems: "flex-start",
+    paddingTop: 14,
+  },
+
+  textArea: {
+    height: 85,
+  },
+
+  proofOptions: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 12,
+  },
+
+  proofOption: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderRadius: 15,
+    padding: 15,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#E7E2ED",
+  },
+
+  selectedProofOption: {
+    borderColor: "#6C4AB6",
+    backgroundColor: "#F5F0FB",
+  },
+
+  proofTitle: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#333",
+    marginTop: 8,
+  },
+
+  proofSubtitle: {
+    fontSize: 10,
+    color: "#999",
+    marginTop: 3,
+    textAlign: "center",
+  },
+
+  uploadBox: {
+    height: 120,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderStyle: "dashed",
+    borderColor: "#6C4AB6",
+    backgroundColor: "#F7F3FB",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 10,
+  },
+
+  uploadTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#555",
+    marginTop: 7,
+  },
+
+  uploadSubtitle: {
+    fontSize: 11,
+    color: "#999",
+    marginTop: 3,
+  },
+
+  errorBorder: {
+    borderWidth: 1,
+    borderColor: "#D9534F",
+    borderRadius: 15,
+  },
+ 
+  errorText: {
+    color: "#D9534F",
+    fontSize: 12,
+    marginTop: 6,
+    marginLeft: 4,
+  },
+
+  submitButton: {
+    height: 55,
+    borderRadius: 15,
+    backgroundColor: "#6C4AB6",
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 25,
+  },
+
+  disabledButton: {
+    opacity: 0.7,
+  },
+
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "700",
+  },
+
+  bottomText: {
+    fontSize: 11,
+    color: "#999",
+    textAlign: "center",
+    lineHeight: 17,
+    marginTop: 12,
+  },
+});

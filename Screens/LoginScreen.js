@@ -47,30 +47,56 @@ export default function LoginScreen({navigation}) {
 
     if(!valid) return;
 
-     const data = await AsyncStorage.getItem("customerData");
+const customerData = await AsyncStorage.getItem("customerData");
+const artisanData = await AsyncStorage.getItem("artisanData");
 
-        if (!data) {
-          alert("Invalid Email or Password.");
-          return;
-        }
+let user = null;
+let userType = null;
 
-        const customer = JSON.parse(data);
+    // Check customer
+    if (customerData) {
+      const customer = JSON.parse(customerData);
 
-        if (
-          email !== customer.email ||
-          password !== customer.password
-        ) {
-          alert("Invalid email or password.");
-          return;
-        }  
-      setLoading(true);
-  
-      setTimeout(() => {
-        setLoading(false)
-        navigation.navigate("CustomerHome",{
-        });
-      }, 2000)
-      
+      if (
+        email === customer.email &&
+        password === customer.password
+      ) {
+        user = customer;
+        userType = "customer";
+      }
+    }
+
+    // Check artisan
+    if (!user && artisanData) {
+      const artisan = JSON.parse(artisanData);
+
+      if (
+        email === artisan.email &&
+        password === artisan.password
+      ) {
+        user = artisan;
+        userType = "artisan";
+      }
+    }
+
+    // No matching account
+    if (!user) {
+      alert("Invalid email or password.");
+      return;
+    }
+
+    setLoading(true);
+
+    setTimeout(() => {
+      setLoading(false);
+
+      if (userType === "customer") {
+        navigation.navigate("CustomerHome");
+      } else if (userType === "artisan") {
+        navigation.navigate("ArtisanHome");
+      }
+    }, 2000);
+          
   }
 
     return (
@@ -171,7 +197,7 @@ export default function LoginScreen({navigation}) {
         <PrimaryButton
           style={styles.register}
           textColor = "#222"
-          onPress={() => navigation.replace("WorkerHome")}
+          onPress={() => navigation.replace("ArtisanHome")}
           icon="construct"
         >
     Continue as Artisan/Worker

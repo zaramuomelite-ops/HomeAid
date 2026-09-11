@@ -143,6 +143,7 @@ useEffect(() => {
         location={customer.location}
         darkMode={darkMode}
         navigation={navigation}
+        userType="customer"
         toggleTheme={toggleTheme}
         onNotificationPress={() => {}}
         />
