@@ -1,40 +1,37 @@
+import { View, StyleSheet } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 
 import CustomerHomeScreen from "../Screens/CustomerHomeScreen";
 import ArtisanHomeScreen from "../Screens/ArtisanHomeScreen";
-
 import BookingScreen from "../Screens/BookingScreen";
 import MessageScreen from "../Screens/MessageScreen";
-import ProfileScreen from "../Screens/ProfileScreen";
 import SOSScreen from "../Screens/SOSScreen";
+import ProfileScreen from "../Screens/ProfileScreen";
+import ArtisanProfileScreen from "../Screens/ArtisanProfileScreen";
 
 const Tab = createBottomTabNavigator();
 
 export default function BottomNavigation({ userType = "customer" }) {
-
   const isArtisan = userType === "artisan";
 
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-
         tabBarActiveTintColor: "#8b15b9",
         tabBarInactiveTintColor: "#888",
 
         tabBarStyle: {
           height: 70,
+          paddingTop: 6,
           paddingBottom: 8,
-          paddingTop: 8,
           backgroundColor: "#fff",
           borderTopWidth: 0,
           elevation: 10,
         },
       }}
     >
-
-      {/* HOME */}
       <Tab.Screen
         name="Home"
         component={
@@ -53,10 +50,10 @@ export default function BottomNavigation({ userType = "customer" }) {
         }}
       />
 
-      {/* BOOKINGS */}
       <Tab.Screen
         name="Bookings"
         component={BookingScreen}
+        initialParams={{ userType }}
         options={{
           tabBarIcon: ({ color, size }) => (
             <Ionicons
@@ -68,22 +65,22 @@ export default function BottomNavigation({ userType = "customer" }) {
         }}
       />
 
-      {/* SOS */}
       <Tab.Screen
         name="SOS"
         component={SOSScreen}
         options={{
           tabBarIcon: () => (
-            <Ionicons
-              name="alert-circle"
-              size={38}
-              color="#8b15b9"
-            />
+            <View style={styles.sosButton}>
+              <Ionicons
+                name="alert-circle"
+                size={25}
+                color="#fff"
+              />
+            </View>
           ),
         }}
       />
 
-      {/* MESSAGES */}
       <Tab.Screen
         name="Messages"
         component={MessageScreen}
@@ -98,10 +95,13 @@ export default function BottomNavigation({ userType = "customer" }) {
         }}
       />
 
-      {/* PROFILE */}
       <Tab.Screen
         name="Profile"
-        component={ProfileScreen}
+        component={
+          isArtisan
+            ? ArtisanProfileScreen
+            : ProfileScreen
+        }
         options={{
           tabBarIcon: ({ color, size }) => (
             <Ionicons
@@ -110,10 +110,19 @@ export default function BottomNavigation({ userType = "customer" }) {
               color={color}
             />
           ),
-        }} 
-
+        }}
       />
-
     </Tab.Navigator>
   );
 }
+
+const styles = StyleSheet.create({
+  sosButton: {
+    width: 35,
+    height: 35,
+    borderRadius: 29,
+    backgroundColor: "#8b15b9",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});

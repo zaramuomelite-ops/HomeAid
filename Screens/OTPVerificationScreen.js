@@ -15,7 +15,7 @@ import PrimaryButton from "../components/PrimaryButton";
 export default function OTPVerificationScreen({ navigation, route }) {
   const [otp, setOtp] = useState(["", "", "", "", ""]);
   const inputRefs = useRef([]);
-  const { userType, phoneNumber } = route.params || {};
+  const { userType, email } = route.params || {};
   const CORRECT_OTP = "08071"
 
   function handleOtpChange(text, index) {
@@ -84,7 +84,7 @@ export default function OTPVerificationScreen({ navigation, route }) {
       />
 
       <Text style={styles.title}>
-        Verify Your Phone
+        Verify to proceed
       </Text>
 
       <Text style={styles.subtitle}>
@@ -92,7 +92,7 @@ export default function OTPVerificationScreen({ navigation, route }) {
       </Text>
       
       <Text style={styles.phone}>
-        +234 {phoneNumber}
+       {email}
       </Text>
 
       <View style={styles.otpContainer}>

@@ -22,7 +22,7 @@ export default function HomeHeader({
      const storageKey =
        userType === "artisan" ? "artisanData" : "customerData";
       
-      const saveData = await AsyncStorage.getItem(storageKey)
+      const savedData = await AsyncStorage.getItem(storageKey)
   
       if (savedData) {
         const customerData = JSON.parse(savedData);

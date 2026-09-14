@@ -14,179 +14,359 @@ import * as ImagePicker from "expo-image-picker";
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function ProfileScreen({ navigation }) {
+export default function ArtisanProfileScreen({ navigation }) {
+  //
+  // ARTISAN DATA
+  //
 
   const [userName, setUserName] = useState("");
   const [email, setEmail] = useState("");
   const [location, setLocation] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [profession, setProfession] = useState("");
   const [profileImage, setProfileImage] = useState(null);
+
+  const [registrationComplete, setRegistrationComplete] =
+    useState(false);
+
   const [loggingOut, setLoggingOut] = useState(false);
+
+  //
+  // LOAD ARTISAN DATA
+  //
+
+  const loadArtisanData = async () => {
+    try {
+      const savedData =
+        await AsyncStorage.getItem("artisanData");
+
+      if (!savedData) {
+        return;
+      }
+
+      const artisanData = JSON.parse(savedData);
+
+      setUserName(artisanData.userName || "");
+
+      setEmail(artisanData.email || "");
+
+      setPhoneNumber(
+        artisanData.phoneNumber || ""
+      );
+
+      setLocation(
+        artisanData.location ||
+          `${artisanData.city || ""}${
+            artisanData.city && artisanData.state
+              ? ", "
+              : ""
+          }${artisanData.state || ""}`
+      );
+
+      setProfession(
+        artisanData.profession || ""
+      );
+
+      setRegistrationComplete(
+        artisanData.registrationComplete === true
+      );
+
+      if (artisanData.profileImage) {
+        setProfileImage(
+          artisanData.profileImage
+        );
+      }
+    } catch (error) {
+      console.log(
+        "Error loading artisan data:",
+        error
+      );
+    }
+  };
+
+  //
+  // LOAD WHEN SCREEN OPENS
+  //
+
+  useEffect(() => {
+    loadArtisanData();
+  }, []);
+
+  //
+  // RELOAD WHEN SCREEN COMES BACK INTO FOCUS
+  //
+
+  useEffect(() => {
+    const unsubscribe =
+      navigation.addListener("focus", () => {
+        loadArtisanData();
+      });
+
+    return unsubscribe;
+  }, [navigation]);
+
+  //
+  // SAVE PROFILE IMAGE
+  //
+
+  const saveProfileImage = async (imageUri) => {
+    try {
+      const savedData =
+        await AsyncStorage.getItem("artisanData");
+
+      const artisanData = savedData
+        ? JSON.parse(savedData)
+        : {};
+
+      artisanData.profileImage = imageUri;
+
+      await AsyncStorage.setItem(
+        "artisanData",
+        JSON.stringify(artisanData)
+      );
+
+      setProfileImage(imageUri);
+    } catch (error) {
+      console.log(
+        "Error saving profile image:",
+        error
+      );
+    }
+  };
+
+  //
+  // PICK PROFILE IMAGE
+  //
+
+  const pickProfileImage = async () => {
+    try {
+      const permissionResult =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (!permissionResult.granted) {
+        Alert.alert(
+          "Gallery Permission Required",
+          "HomeAid Connect needs access to your gallery so you can choose a profile picture."
+        );
+
+        return;
+      }
+
+      const result =
+        await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ["images"],
+          allowsEditing: true,
+          aspect: [1, 1],
+          quality: 0.8,
+        });
+
+      if (
+        !result.canceled &&
+        result.assets?.length > 0
+      ) {
+        const imageUri =
+          result.assets[0].uri;
+
+        setProfileImage(imageUri);
+
+        await saveProfileImage(imageUri);
+      }
+    } catch (error) {
+      console.log(
+        "Error selecting profile image:",
+        error
+      );
+    }
+  };
+
+  //
+  // LOGOUT
+  //
 
   const handleLogout = async () => {
     setLoggingOut(true);
-  
-    // i'll add a small transition
+
     setTimeout(() => {
       navigation.replace("Welcome");
     }, 2000);
   };
 
-  const saveProfileImage = async () => {
-    try {
-      const savedData = await AsyncStorage.getItem("customerData");
-  
-      const customerData = savedData
-        ? JSON.parse(savedData)
-        : {};
-  
-      customerData.profileImage = imageUri;
-  
-      await AsyncStorage.setItem(
-        "customerData",
-        JSON.stringify(customerData)
-      );
-  
-    } catch (error) {
-      console.log("Error saving profile image:", error);
-    }
-  };
+  //
+  // EDIT PROFILE
+  //
 
-
-
-  useEffect(() => {
-    loadCustomerData();
-  }, []);
-  
-  const loadCustomerData = async () => {
-    try {
-      const savedData = await AsyncStorage.getItem("customerData");
-  
-      if (savedData) {
-        const customerData = JSON.parse(savedData);
-  
-        setUserName(customerData.userName || "");
-        setEmail(customerData.email || "");
-        setLocation(customerData.location || "");
-        setPhoneNumber(customerData.phoneNumber || "");
-  
-        if (customerData.profileImage) {
-          setProfileImage(customerData.profileImage);
-        }
-      }
-    } catch (error) {
-      console.log("Error loading customer data:", error);
-    }
-  };
-
-  // OPEN GALLERY
-  const pickProfileImage = async () => {
-    const permissionResult =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
-  
-    if (!permissionResult.granted) {
-      alert("Permission to access your gallery is required.");
-      return;
-    }
-  
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
+  const handleEditProfile = () => {
+    navigation.navigate("EditProfile", {
+      userType: "artisan",
     });
-  
-    if (!result.canceled) {
-      const imageUri = result.assets[0].uri;
-    
-      setProfileImage(imageUri);
-    
-      await saveProfileImage(imageUri);
-    }
   };
+
+  //
+  // BOOKINGS
+  //
+
+  const handleBookings = () => {
+    navigation.navigate("Bookings", {
+      userType: "artisan",
+    });
+  };
+
+  //
+  // COMING SOON
+  //
+
+  const showComingSoon = (title) => {
+    Alert.alert(
+      title,
+      "This feature will be available soon."
+    );
+  };
+
+  //
+  // SCREEN
+  //
 
   return (
-
     <View style={styles.screen}>
 
-      {/* HEADER */}
+      {/*
+          HEADER
+     */}
 
       <View style={styles.header}>
+
+        {/* BACK BUTTON */}
 
         <Pressable
           style={styles.headerButton}
           onPress={() => navigation.goBack()}
         >
-
           <Ionicons
             name="arrow-back"
             size={27}
             color="#8b15b9"
           />
-
         </Pressable>
 
+
+        {/* TITLE */}
 
         <Text style={styles.headerTitle}>
           Settings
         </Text>
 
+
+        {/* SETTINGS BUTTON */}
+
+        <Pressable
+          style={styles.settingsButton}
+          onPress={() =>
+            showComingSoon("Settings")
+          }
+        >
+          <Ionicons
+            name="settings"
+            size={28}
+            color="#fff"
+          />
+        </Pressable>
+
       </View>
 
+
+      {/*
+          CONTENT
+     */}
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}
       >
 
-
-        {/* PROFILE CARD */}
+        {/* ===
+            PROFILE CARD
+        === */}
 
         <View style={styles.profileCard}>
 
           {/* PROFILE IMAGE */}
 
-          <View style={styles.profileImageContainer}>
+          <Pressable
+            style={styles.profileImageContainer}
+            onPress={pickProfileImage}
+          >
 
             {profileImage ? (
 
               <Image
-                source={{ uri: profileImage }}
+                source={{
+                  uri: profileImage,
+                }}
                 style={styles.profileImage}
               />
 
             ) : (
 
-              <View style={styles.defaultProfileImage}>
-
+              <View
+                style={
+                  styles.defaultProfileImage
+                }
+              >
                 <Ionicons
                   name="person"
                   size={65}
                   color="#b77acb"
                 />
-
               </View>
 
             )}
 
-          </View>
+          </Pressable>
 
 
-          {/* CUSTOMER INFORMATION */}
+          {/* PROFILE INFORMATION */}
 
           <View style={styles.profileInfo}>
 
+            {/* NAME */}
+
             <View style={styles.nameRow}>
 
-            <Text style={styles.name}>
-            {userName || "Customer"}
-            </Text>
+              <Text
+                style={styles.name}
+                numberOfLines={1}
+              >
+                {userName || "Artisan"}
+              </Text>
+
+              {registrationComplete && (
+                <Ionicons
+                  name="checkmark-circle"
+                  size={20}
+                  color="#8b15b9"
+                />
+              )}
+
+            </View>
+
+
+            {/* PROFESSION */}
+
+            <View style={styles.contactRow}>
 
               <Ionicons
-                name="checkmark-circle"
-                size={20}
+                name="briefcase-outline"
+                size={18}
                 color="#8b15b9"
               />
+
+              <Text
+                style={styles.contactText}
+                numberOfLines={1}
+              >
+                {profession ||
+                  "Profession not available"}
+              </Text>
 
             </View>
 
@@ -201,9 +381,13 @@ export default function ProfileScreen({ navigation }) {
                 color="#8b15b9"
               />
 
-         <Text style={styles.email}>
-         {email || "No email available"}
-         </Text>
+              <Text
+                style={styles.contactText}
+                numberOfLines={1}
+              >
+                {email ||
+                  "No email available"}
+              </Text>
 
             </View>
 
@@ -218,8 +402,12 @@ export default function ProfileScreen({ navigation }) {
                 color="#8b15b9"
               />
 
-              <Text style={styles.contactText}>
-              {phoneNumber || "Contact not available"}
+              <Text
+                style={styles.contactText}
+                numberOfLines={1}
+              >
+                {phoneNumber ||
+                  "Contact not available"}
               </Text>
 
             </View>
@@ -235,22 +423,27 @@ export default function ProfileScreen({ navigation }) {
                 color="#8b15b9"
               />
 
-        <Text style={styles.location}>
-        {location || "Location not set"}
-        </Text>
-
+              <Text
+                style={styles.contactText}
+                numberOfLines={1}
+              >
+                {location ||
+                  "Location not set"}
+              </Text>
 
             </View>
 
 
-            {/* EDIT */}
+            {/* EDIT PROFILE */}
 
             <Pressable
               style={styles.editButton}
-              onPress={() => navigation.navigate("EditProfile")}
+              onPress={handleEditProfile}
             >
 
-              <Text style={styles.editButtonText}>
+              <Text
+                style={styles.editButtonText}
+              >
                 Edit Profile
               </Text>
 
@@ -267,7 +460,9 @@ export default function ProfileScreen({ navigation }) {
         </View>
 
 
-        {/* MY ACTIVITIES */}
+        {/* ===
+            MY ACTIVITIES
+        === */}
 
         <Text style={styles.sectionTitle}>
           My Activities
@@ -276,30 +471,28 @@ export default function ProfileScreen({ navigation }) {
 
         <View style={styles.menuCard}>
 
-          {/* BOOKINGS */}
+          {/* MY BOOKINGS */}
 
           <ProfileMenuItem
             icon="calendar-outline"
             iconColor="#8b15b9"
             backgroundColor="#f1e4ff"
-            title="My Bookings"
+            title="My Requests"
             subtitle="View your upcoming and past bookings"
-            onPress={() =>
-              navigation.navigate("Bookings")
-            }
+            onPress={handleBookings}
           />
 
 
-          {/* CASHBACK */}
+          {/* WALLET */}
 
           <ProfileMenuItem
             icon="wallet-outline"
             iconColor="#20a85a"
             backgroundColor="#e4f8e9"
             title="Wallet"
-            subtitle="Check your cashback balance and history"
+            subtitle="Check your earnings and payment history"
             onPress={() =>
-              navigation.navigate("Cashback")
+              showComingSoon("Wallet")
             }
           />
 
@@ -310,10 +503,12 @@ export default function ProfileScreen({ navigation }) {
             icon="heart-outline"
             iconColor="#e83e67"
             backgroundColor="#ffe6ed"
-            title="Saved Professionals"
+            title="Saved Customers"
             subtitle="View professionals you have saved"
             onPress={() =>
-              navigation.navigate("SavedProfessionals")
+              showComingSoon(
+                "Saved Professionals"
+              )
             }
           />
 
@@ -327,14 +522,18 @@ export default function ProfileScreen({ navigation }) {
             title="Saved Addresses"
             subtitle="Manage your saved service addresses"
             onPress={() =>
-              navigation.navigate("SavedAddresses")
+              showComingSoon(
+                "Saved Addresses"
+              )
             }
           />
 
         </View>
 
 
-        {/* ACCOUNT */}
+        {/* ===
+            ACCOUNT
+        === */}
 
         <Text style={styles.sectionTitle}>
           Account
@@ -351,7 +550,7 @@ export default function ProfileScreen({ navigation }) {
             backgroundColor="#e7efff"
             title="Personal Information"
             subtitle="Manage your personal details"
-            onPress={() => {}}
+            onPress={handleEditProfile}
           />
 
 
@@ -363,7 +562,11 @@ export default function ProfileScreen({ navigation }) {
             backgroundColor="#f1e4ff"
             title="Payment Methods"
             subtitle="Manage your cards and payment options"
-            onPress={() => {}}
+            onPress={() =>
+              showComingSoon(
+                "Payment Methods"
+              )
+            }
           />
 
 
@@ -375,11 +578,15 @@ export default function ProfileScreen({ navigation }) {
             backgroundColor="#fff7d9"
             title="Notifications"
             subtitle="Manage your notification preferences"
-            onPress={() => {}}
+            onPress={() =>
+              showComingSoon(
+                "Notifications"
+              )
+            }
           />
 
 
-          {/* PRIVACY */}
+          {/* PRIVACY & SECURITY */}
 
           <ProfileMenuItem
             icon="shield-checkmark-outline"
@@ -387,13 +594,19 @@ export default function ProfileScreen({ navigation }) {
             backgroundColor="#e4f8e9"
             title="Privacy & Security"
             subtitle="Manage your privacy and security"
-            onPress={() => {}}
+            onPress={() =>
+              showComingSoon(
+                "Privacy & Security"
+              )
+            }
           />
 
         </View>
 
 
-        {/* SUPPORT */}
+        {/* ===
+            SUPPORT
+        === */}
 
         <Text style={styles.sectionTitle}>
           Support
@@ -402,7 +615,7 @@ export default function ProfileScreen({ navigation }) {
 
         <View style={styles.menuCard}>
 
-          {/* HELP */}
+          {/* HELP & SUPPORT */}
 
           <ProfileMenuItem
             icon="help-circle-outline"
@@ -410,11 +623,15 @@ export default function ProfileScreen({ navigation }) {
             backgroundColor="#e7f1ff"
             title="Help & Support"
             subtitle="Get help and find answers"
-            onPress={() => {}}
+            onPress={() =>
+              showComingSoon(
+                "Help & Support"
+              )
+            }
           />
 
 
-          {/* CONTACT */}
+          {/* CONTACT US */}
 
           <ProfileMenuItem
             icon="headset-outline"
@@ -422,7 +639,9 @@ export default function ProfileScreen({ navigation }) {
             backgroundColor="#f1e4ff"
             title="Contact Us"
             subtitle="Reach out to our support team"
-            onPress={() => {}}
+            onPress={() =>
+              showComingSoon("Contact Us")
+            }
           />
 
 
@@ -434,40 +653,64 @@ export default function ProfileScreen({ navigation }) {
             backgroundColor="#fff7d9"
             title="Rate HomeAidConnect"
             subtitle="Share your experience with us"
-            onPress={() => {}}
+            onPress={() =>
+              showComingSoon(
+                "Rate HomeAidConnect"
+              )
+            }
           />
 
         </View>
 
 
-        {/* LOG OUT */}
-      <View style={styles.logoutWrapper}>
-      <Pressable
-        style={styles.logoutButton}
-        onPress={handleLogout}
-        disabled={loggingOut}
-      >
-        {loggingOut ? (
-          <>
-            <Text style={styles.logoutText}>Logging out...</Text>
-            <ActivityIndicator
-              size="small"
-              color="#e05b70"
-            />
-          </>
-        ) : (
-          <>
-            <Ionicons
-              name="log-out-outline"
-              size={21}
-              color="#e05b70"
-            />
-            <Text style={styles.logoutText}>Logout</Text>
-          </>
-        )}
-      </Pressable>
-    </View>
+        {/* ===
+            LOGOUT
+        === */}
 
+        <View style={styles.logoutWrapper}>
+
+          <Pressable
+            style={styles.logoutButton}
+            onPress={handleLogout}
+            disabled={loggingOut}
+          >
+
+            {loggingOut ? (
+
+              <>
+                <Text
+                  style={styles.logoutText}
+                >
+                  Logging out...
+                </Text>
+
+                <ActivityIndicator
+                  size="small"
+                  color="#e05b70"
+                />
+              </>
+
+            ) : (
+
+              <>
+                <Ionicons
+                  name="log-out-outline"
+                  size={21}
+                  color="#e05b70"
+                />
+
+                <Text
+                  style={styles.logoutText}
+                >
+                  Logout
+                </Text>
+              </>
+
+            )}
+
+          </Pressable>
+
+        </View>
 
       </ScrollView>
 
@@ -476,19 +719,18 @@ export default function ProfileScreen({ navigation }) {
 }
 
 
-/* REUSABLE PROFILE MENU ITEM*/
+/*
+   REUSABLE PROFILE MENU ITEM */
 
-      function ProfileMenuItem({
-        icon,
-        iconColor,
-        backgroundColor,
-        title,
-        subtitle,
-        onPress,
-      }) {
-
+function ProfileMenuItem({
+  icon,
+  iconColor,
+  backgroundColor,
+  title,
+  subtitle,
+  onPress,
+}) {
   return (
-
     <Pressable
       style={styles.menuItem}
       onPress={onPress}
@@ -503,7 +745,8 @@ export default function ProfileScreen({ navigation }) {
         style={[
           styles.menuIcon,
           {
-            backgroundColor: backgroundColor,
+            backgroundColor:
+              backgroundColor,
           },
         ]}
       >
@@ -519,7 +762,9 @@ export default function ProfileScreen({ navigation }) {
 
       {/* TEXT */}
 
-      <View style={styles.menuTextContainer}>
+      <View
+        style={styles.menuTextContainer}
+      >
 
         <Text style={styles.menuTitle}>
           {title}
@@ -545,9 +790,8 @@ export default function ProfileScreen({ navigation }) {
 }
 
 
-/* 
-   STYLES
- */
+/*
+   STYLES */
 
 const styles = StyleSheet.create({
 
@@ -557,7 +801,9 @@ const styles = StyleSheet.create({
   },
 
 
-  /* HEADER */
+  /*
+     HEADER
+ */
 
   header: {
     height: 100,
@@ -583,9 +829,23 @@ const styles = StyleSheet.create({
     fontSize: 23,
     fontWeight: "700",
     color: "#18131b",
-    marginRight: 120
   },
 
+  settingsButton: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: "#bdbdbd",
+    borderWidth: 7,
+    borderColor: "#eeeeee",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+
+  /*
+     CONTENT
+ */
 
   content: {
     paddingHorizontal: 18,
@@ -594,7 +854,9 @@ const styles = StyleSheet.create({
   },
 
 
-  /* PROFILE CARD */
+  /*
+     PROFILE CARD
+ */
 
   profileCard: {
     backgroundColor: "#f8effb",
@@ -608,7 +870,9 @@ const styles = StyleSheet.create({
   },
 
 
-  /* PROFILE IMAGE */
+  /*
+     PROFILE IMAGE
+ */
 
   profileImageContainer: {
     width: 105,
@@ -637,7 +901,9 @@ const styles = StyleSheet.create({
   },
 
 
-  /* PROFILE INFORMATION */
+  /*
+     PROFILE INFORMATION
+ */
 
   profileInfo: {
     flex: 1,
@@ -646,14 +912,15 @@ const styles = StyleSheet.create({
   nameRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 5,
     marginBottom: 8,
   },
 
-  customerName: {
+  name: {
     fontSize: 20,
     fontWeight: "700",
     color: "#19131b",
+    marginRight: 5,
+    flexShrink: 1,
   },
 
   contactRow: {
@@ -670,7 +937,9 @@ const styles = StyleSheet.create({
   },
 
 
-  /* EDIT BUTTON */
+  /*
+     EDIT BUTTON
+ */
 
   editButton: {
     height: 38,
@@ -682,17 +951,19 @@ const styles = StyleSheet.create({
     marginTop: 5,
     flexDirection: "row",
     alignItems: "center",
-    gap: 5,
   },
 
   editButtonText: {
     color: "#8b15b9",
     fontSize: 13,
     fontWeight: "700",
+    marginRight: 5,
   },
 
 
-  /* SECTION */
+  /*
+     SECTION
+ */
 
   sectionTitle: {
     fontSize: 20,
@@ -703,7 +974,9 @@ const styles = StyleSheet.create({
   },
 
 
-  /* MENU CARD */
+  /*
+     MENU CARD
+ */
 
   menuCard: {
     backgroundColor: "#fff",
@@ -716,7 +989,9 @@ const styles = StyleSheet.create({
   },
 
 
-  /* MENU ITEM */
+  /*
+     MENU ITEM
+ */
 
   menuItem: {
     minHeight: 78,
@@ -726,7 +1001,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-
   menuIcon: {
     width: 46,
     height: 46,
@@ -735,7 +1009,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 13,
   },
-
 
   menuTextContainer: {
     flex: 1,
@@ -756,7 +1029,9 @@ const styles = StyleSheet.create({
   },
 
 
-  /* LOGOUT */
+  /*
+     LOGOUT
+ */
 
   logoutButton: {
     height: 55,
@@ -767,7 +1042,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     flexDirection: "row",
-    gap: 8,
   },
 
   logoutWrapper: {
@@ -781,6 +1055,7 @@ const styles = StyleSheet.create({
     color: "#e63859",
     fontSize: 16,
     fontWeight: "700",
+    marginRight: 8,
   },
 
 });

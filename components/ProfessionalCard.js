@@ -8,8 +8,13 @@ export default function ProfessionalCard({
   distance,
   image,
   onPress,
+
 }) {
   return (
+    <Pressable
+     style={styles.ripple}
+     onPress={onPress}
+     android_ripple={{color: "#a3a2a736", foreground: true}}>
     <View style={styles.card}>
 
       <Image
@@ -57,28 +62,30 @@ export default function ProfessionalCard({
 
       </View>
 
+    <View
+       style={styles.bookButtonWrapper}>
       <Pressable
         style={styles.bookButton}
         onPress={onPress}
+        android_ripple={{color: "#230f79"}}
       >
         <Text style={styles.bookText}>
           Book
         </Text>
       </Pressable>
+    </View>
 
     </View>
+    </Pressable>
+ 
   );
 }
 
 const styles = StyleSheet.create({
 
     card: {
-      width: "90%",
       backgroundColor: "#fff",
-      borderRadius: 18,
       padding: 15,
-      marginTop: 10,
-      marginBottom: 10,
       flexDirection: "row",
       alignItems: "center",
   
@@ -91,7 +98,16 @@ const styles = StyleSheet.create({
         height: 3,
       },
     },
-  
+
+    ripple: {
+      width: "90%",
+      borderRadius: 18,
+      overflow: "hidden",
+      marginTop: 10,
+      marginBottom: 10,
+      backgroundColor: "#fff",
+    },
+    
     image: {
       width: 65,
       height: 65,
@@ -141,7 +157,11 @@ const styles = StyleSheet.create({
       backgroundColor: "#8b15b9",
       paddingVertical: 9,
       paddingHorizontal: 14,
+    },
+
+    bookButtonWrapper: {
       borderRadius: 10,
+      overflow: "hidden",
     },
   
     bookText: {
