@@ -11,6 +11,7 @@ import InputField from "../components/InputField";
 import { Ionicons } from "@expo/vector-icons";
 import  AsyncStorage  from "@react-native-async-storage/async-storage";
 import { useState } from "react";
+import { registerUser } from "../api/auth";
 
 export default function CustomerSignupScreen({navigation}) {
   const [userName, setUserName] = useState ("")
@@ -38,91 +39,132 @@ export default function CustomerSignupScreen({navigation}) {
   const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/;
   const birthDateRegex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
 
-  function signUpHandler() {
-   let valid = true
-
-   if (userName.trim() === ""){
-    setNameError ("This field is required");
-    valid = false;
-   }else if (!nameRegex.test(userName.trim())){
-    setNameError("Letters only");
-    valid = false
-   } else {
-    setNameError("")
-   }
-
-   if (location.trim() === ""){
-    setLocationError ("This field is required");
-    valid = false;
-   } else {
-    setLocationError("")
-   }
-
-
-   if (birthDate.trim() === ""){
-    setBirthDateError ("This field is required");
-    valid = false;
-   }else if (gender !== male || female){
-    setGenderError("Input the your gen");
-    valid = false
-   } else {
-    setBirthDateError("")
-   }
-
-   if (phoneNumber.trim() === ""){
-    setPhoneError ("This field is required");
-    valid = false
-   }else if(!phoneRegex.test(phoneNumber.trim())){
-    setPhoneError ("Enter a valid 10-digit phone number");
-    valid = false
-   }else{
-    setPhoneError("")
-   }
-
-   if (email.trim() === ""){
-    setEmailError("This field is required");
-    valid = false;
-   }else if (!emailRegex.test(email.trim())){
-    setEmailError("Enter a valid email");
-    valid = false;
-   }else{
-    setEmailError("")
-   }
-
-   if (gender === "") {
-    setGenderError("Please select your gender");
-    valid = false;
-  } else {
-    setGenderError("");
-  }
-
-   if (password.trim() === ""){
-    setPasswordError ("This field is required");
-    valid = false
-   }else if (password.length < 8){
-    setPasswordError("Password should be at least 8 characters")
-    valid = false;
-   }else if (!passwordRegex.test(password.trim())){
-    setPasswordError("Password not strong enough");
-    valid = false
-   }else{
-    setPasswordError("")
-   }
-
-   if (confirmPassword.trim() === ""){
-    setConfirmPasswordError ("This field is required");
-    valid = false
-   }else if (password !== confirmPassword){
-    setConfirmPasswordError("passwords do not match");
-    valid = false
-   }else{
-    setConfirmPasswordError("")
-   }
-
-   if(valid){
+  async function signUpHandler() {
+    let valid = true;
+  
+    // USERNAME
+    if (userName.trim() === "") {
+      setNameError("This field is required");
+      valid = false;
+    } else if (!nameRegex.test(userName.trim())) {
+      setNameError("Letters only");
+      valid = false;
+    } else {
+      setNameError("");
+    }
+  
+    // LOCATION
+    if (location.trim() === "") {
+      setLocationError("This field is required");
+      valid = false;
+    } else {
+      setLocationError("");
+    }
+  
+    // DATE OF BIRTH
+    if (birthDate.trim() === "") {
+      setBirthDateError("This field is required");
+      valid = false;
+    } else if (!birthDateRegex.test(birthDate.trim())) {
+      setBirthDateError("Use DD/MM/YYYY");
+      valid = false;
+    } else {
+      setBirthDateError("");
+    }
+  
+    // PHONE NUMBER
+    if (phoneNumber.trim() === "") {
+      setPhoneError("This field is required");
+      valid = false;
+    } else if (!phoneRegex.test(phoneNumber.trim())) {
+      setPhoneError("Enter a valid 10-digit phone number");
+      valid = false;
+    } else {
+      setPhoneError("");
+    }
+  
+    // EMAIL
+    if (email.trim() === "") {
+      setEmailError("This field is required");
+      valid = false;
+    } else if (!emailRegex.test(email.trim())) {
+      setEmailError("Enter a valid email");
+      valid = false;
+    } else {
+      setEmailError("");
+    }
+  
+    // GENDER
+    if (gender === "") {
+      setGenderError("Please select your gender");
+      valid = false;
+    } else {
+      setGenderError("");
+    }
+  
+    // PASSWORD
+    if (password.trim() === "") {
+      setPasswordError("This field is required");
+      valid = false;
+    } else if (password.length < 8) {
+      setPasswordError("Password should be at least 8 characters");
+      valid = false;
+    } else if (!passwordRegex.test(password.trim())) {
+      setPasswordError("Password not strong enough");
+      valid = false;
+    } else {
+      setPasswordError("");
+    }
+  
+    // CONFIRM PASSWORD
+    if (confirmPassword.trim() === "") {
+      setConfirmPasswordError("This field is required");
+      valid = false;
+    } else if (password !== confirmPassword) {
+      setConfirmPasswordError("Passwords do not match");
+      valid = false;
+    } else {
+      setConfirmPasswordError("");
+    }
+  
+    // STOP HERE IF FORM IS INVALID
+    if (!valid) {
+      return;
+    }
+  
     setLoading(true);
-
-    setTimeout(async () => {
+  
+    try {
+      // Convert gender to the value expected by the backend
+      const backendGender =
+        gender === "Male" ? "MALE" : "FEMALE";
+  
+      // Convert DD/MM/YYYY to YYYY-MM-DD
+      const [day, month, year] = birthDate.split("/");
+  
+      const formattedBirthDate = `${year}-${month}-${day}`;
+  
+      // Prepare the data for Django
+      const userData = {
+        username: userName.trim(),
+        email: email.trim(),
+        password: password,
+        password_confirm: confirmPassword,
+        phone_number: `+234${phoneNumber.trim()}`,
+        role: "CUSTOMER",
+        gender: backendGender,
+        location: location.trim(),
+        date_of_birth: formattedBirthDate,
+      };
+  
+      console.log("REGISTRATION DATA:", userData);
+  
+      // Send registration request to backend
+      const response = await registerUser(userData);
+  
+      console.log("REGISTRATION SUCCESS:", response);
+  
+      // Save local customer information
       await AsyncStorage.setItem(
         "customerData",
         JSON.stringify({
@@ -134,13 +176,22 @@ export default function CustomerSignupScreen({navigation}) {
           gender,
         })
       );
-
-      setLoading(false)
-      navigation.navigate("OTPVerification",{
+  
+      // Go to OTP screen
+      navigation.navigate("OTPVerification", {
         userType: "customer",
-        phoneNumber,
+        phoneNumber: phoneNumber,
+        email: email,
       });
-    }, 2000)
+  
+    } catch (error) {
+      console.log("REGISTRATION FAILED:", error);
+  
+      alert(
+        error.message || "Registration failed. Please try again."
+      );
+    } finally {
+      setLoading(false);
     }
   }
     return (

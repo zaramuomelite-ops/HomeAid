@@ -10,7 +10,6 @@ import {
   Platform,
   Modal,
   Alert,
-  ActivityIndicator,
 } from "react-native";
 
 import {
@@ -190,8 +189,35 @@ export default function MessagesScreen({
   const [message, setMessage] =
     useState("");
 
+
+  /*
+  AUTOMATIC ARTISAN GREETING
+  ---------------------------------------
+  Only the CUSTOMER gets this initial
+  message when opening an artisan chat.
+  */
+
   const [messages, setMessages] =
-    useState([]);
+    useState(() => {
+
+      if (isArtisan) {
+        return [];
+      }
+
+      return [
+        {
+          id: "automatic-artisan-greeting",
+          text:
+            `${getGreeting()} Thanks for reaching out! How can I help you today?`,
+          sender: "them",
+          time: getCurrentTime(),
+          attachment: null,
+          isAutomaticGreeting: true,
+        },
+      ];
+
+    });
+
 
   const [showAttachmentMenu, setShowAttachmentMenu] =
     useState(false);
@@ -207,9 +233,6 @@ export default function MessagesScreen({
       professional?.isAvailable === true
     );
 
-  const [loadingProfile, setLoadingProfile] =
-    useState(false);
-
   const scrollViewRef =
     useRef(null);
 
@@ -224,8 +247,6 @@ export default function MessagesScreen({
       if (!isArtisan) {
 
         try {
-
-          setLoadingProfile(true);
 
           const savedArtisan =
             await AsyncStorage.getItem(
@@ -260,21 +281,7 @@ export default function MessagesScreen({
             professional?.isAvailable === true
           );
 
-        } finally {
-
-          setLoadingProfile(false);
-
         }
-
-      } else {
-
-        /*
-          When the artisan is using Messages,
-          their own availability is not needed
-          to determine the customer's status.
-        */
-
-        setLoadingProfile(false);
 
       }
 
@@ -320,9 +327,10 @@ export default function MessagesScreen({
     const trimmedMessage =
       message.trim();
 
+
     /*
-      Don't send an empty message unless
-      there is an attachment.
+    Don't send an empty message unless
+    there is an attachment.
     */
 
     if (
@@ -387,11 +395,8 @@ export default function MessagesScreen({
 
 
         /*
-          Ask the operating system for
-          photo library permission.
-
-          This produces the real phone
-          permission dialog.
+        Ask the operating system for
+        photo library permission.
         */
 
         const permission =
@@ -412,9 +417,10 @@ export default function MessagesScreen({
               },
               {
                 text: "Settings",
-                onPress:
-                  ImagePicker
-                    .getMediaLibraryPermissionsAsync,
+                onPress: () => {
+                  // The user can manually enable
+                  // permission from app settings.
+                },
               },
             ]
           );
@@ -514,17 +520,6 @@ export default function MessagesScreen({
 
         setShowAttachmentMenu(false);
 
-
-        /*
-          The system document picker handles
-          access to files.
-
-          Unlike the photo gallery, modern
-          Android/iOS document pickers normally
-          do not require broad storage permission.
-          The operating system gives the app
-          access to the file the user selects.
-        */
 
         const result =
           await DocumentPicker.getDocumentAsync({
@@ -652,19 +647,6 @@ export default function MessagesScreen({
 
   /*
   ONLINE STATUS
-  */
-
-  /*
-    For now:
-
-    Customer viewing artisan:
-      professional.isAvailable / artisanData.isAvailable
-
-    Artisan viewing customer:
-      customer.isOnline
-
-    Later the backend can provide true
-    real-time online presence.
   */
 
   const isPartnerOnline =
@@ -915,7 +897,7 @@ export default function MessagesScreen({
         </Text>
 
 
-        {/* EXISTING MESSAGES */}
+        {/* MESSAGES */}
 
         {messages.map((item) => {
 
@@ -1091,6 +1073,8 @@ export default function MessagesScreen({
                 ) : null}
 
 
+                {/* TIME */}
+
                 <Text
                   style={[
                     styles.messageTimestamp,
@@ -1110,7 +1094,7 @@ export default function MessagesScreen({
         })}
 
 
-        {/* EMPTY CHAT */}
+        {/* EMPTY CHAT FOR ARTISAN */}
 
         {messages.length === 0 && (
 
@@ -1688,8 +1672,8 @@ export default function MessagesScreen({
 }
 
 
-/*==
-STYLES==
+/*
+STYLES
 */
 
 const styles =
@@ -1841,6 +1825,7 @@ const styles =
       marginTop: 10,
       marginBottom: 20,
     },
+
 
     /*
     EMPTY CHAT
@@ -2189,8 +2174,9 @@ const styles =
     },
 
 
-    // ATTACHMENT MODAL
-    
+    /*
+    ATTACHMENT MODAL
+    */
 
     attachmentOverlay: {
       flex: 1,

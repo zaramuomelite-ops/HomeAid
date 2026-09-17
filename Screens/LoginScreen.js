@@ -7,10 +7,11 @@ import {Text,
         Platform} from "react-native";
 import PrimaryButton from "../components/PrimaryButton";
 import InputField from "../components/InputField";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Pressable } from "react-native"
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { loginUser } from "../api/auth";
 
 export default function LoginScreen({navigation}) {
   const [email, setEmail] = useState ("")
@@ -24,79 +25,86 @@ export default function LoginScreen({navigation}) {
 
   async function loginHandler() {
     let valid = true;
-
+  
+    // EMAIL VALIDATION
     if (email.trim() === "") {
       setEmailError("This field is required");
       valid = false;
-    } else if (!emailRegex.test(email.trim())){
+    } else if (!emailRegex.test(email.trim())) {
       setEmailError("Enter a valid email address.");
-      valid = false
+      valid = false;
     } else {
-      setEmailError("")
+      setEmailError("");
     }
-
-    if (password.trim() === ""){
+  
+    // PASSWORD VALIDATION
+    if (password.trim() === "") {
       setPasswordError("This field is required");
       valid = false;
-    } else if (password.length < 8){
-      setPasswordError("Password should be at least 8 characters")
+    } else if (password.length < 8) {
+      setPasswordError("Password should be at least 8 characters");
       valid = false;
     } else {
-      setPasswordError("")
-    } 
-
-    if(!valid) return;
-
-const customerData = await AsyncStorage.getItem("customerData");
-const artisanData = await AsyncStorage.getItem("artisanData");
-
-let user = null;
-let userType = null;
-
-    // Check customer
-    if (customerData) {
-      const customer = JSON.parse(customerData);
-
-      if (
-        email === customer.email &&
-        password === customer.password
-      ) {
-        user = customer;
-        userType = "customer";
-      }
+      setPasswordError("");
     }
-
-    // Check artisan
-    if (!user && artisanData) {
-      const artisan = JSON.parse(artisanData);
-
-      if (
-        email === artisan.email &&
-        password === artisan.password
-      ) {
-        user = artisan;
-        userType = "artisan";
-      }
-    }
-
-    // No matching account
-    if (!user) {
-      alert("Invalid email or password.");
+  
+    if (!valid) {
       return;
     }
-
+  
     setLoading(true);
-
-    setTimeout(() => {
-      setLoading(false);
-
-      if (userType === "customer") {
-        navigation.navigate("CustomerHome");
-      } else if (userType === "artisan") {
-        navigation.navigate("ArtisanHome");
+  
+    try {
+      const loginData = {
+        email: email.trim(),
+        password: password,
+      };
+  
+      console.log("LOGIN DATA:", loginData);
+  
+      const response = await loginUser(loginData);
+  
+      console.log("LOGIN SUCCESS:", response);
+  
+      // Save tokens from backend
+      if (response?.tokens) {
+        await AsyncStorage.setItem(
+          "accessToken",
+          response.tokens.access
+        );
+  
+        await AsyncStorage.setItem(
+          "refreshToken",
+          response.tokens.refresh
+        );
       }
-    }, 2000);
-          
+  
+      // Save user information if backend sends it
+      if (response?.user) {
+        await AsyncStorage.setItem(
+          "userData",
+          JSON.stringify(response.user)
+        );
+      }
+  
+      setLoading(false);
+  
+      // Navigate according to role
+      if (response?.user?.role === "ARTISAN") {
+        navigation.replace("ArtisanHome");
+      } else {
+        navigation.replace("CustomerHome");
+      }
+  
+    } catch (error) {
+      console.log("LOGIN FAILED:", error);
+  
+      alert(
+        error.message || "Login failed. Please check your email and password."
+      );
+  
+      setLoading(false);
+    }
   }
 
     return (

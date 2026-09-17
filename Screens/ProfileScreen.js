@@ -11,7 +11,8 @@ import {
 
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ProfileScreen({ navigation }) {
@@ -52,7 +53,11 @@ export default function ProfileScreen({ navigation }) {
     }
   };
 
-
+  useFocusEffect(
+    useCallback(() => {
+      loadCustomerData();
+    }, [])
+  );
 
   useEffect(() => {
     loadCustomerData();
@@ -147,29 +152,21 @@ export default function ProfileScreen({ navigation }) {
           {/* PROFILE IMAGE */}
 
           <View style={styles.profileImageContainer}>
-
-            {profileImage ? (
-
-              <Image
-                source={{ uri: profileImage }}
-                style={styles.profileImage}
+          {profileImage ? (
+            <Image
+              source={{ uri: profileImage }}
+              style={styles.profileImage}
+            />
+          ) : (
+            <View style={styles.defaultProfileImage}>
+              <Ionicons
+                name="person-outline"
+                size={65}
+                color="#b77acb"
               />
-
-            ) : (
-
-              <View style={styles.defaultProfileImage}>
-
-                <Ionicons
-                  name="person"
-                  size={65}
-                  color="#b77acb"
-                />
-
-              </View>
-
-            )}
-
-          </View>
+            </View>
+          )}
+        </View>
 
 
           {/* CUSTOMER INFORMATION */}

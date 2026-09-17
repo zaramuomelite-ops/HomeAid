@@ -11,7 +11,8 @@ import {
 
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ArtisanProfileScreen({ navigation }) {
@@ -84,17 +85,16 @@ export default function ArtisanProfileScreen({ navigation }) {
     }
   };
 
-  //
-  // LOAD WHEN SCREEN OPENS
-  //
+
+  useFocusEffect(
+    useCallback(() => {
+      loadCustomerData();
+    }, [])
+  );
 
   useEffect(() => {
     loadArtisanData();
   }, []);
-
-  //
-  // RELOAD WHEN SCREEN COMES BACK INTO FOCUS
-  //
 
   useEffect(() => {
     const unsubscribe =
